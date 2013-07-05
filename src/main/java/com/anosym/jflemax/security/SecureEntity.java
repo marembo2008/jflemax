@@ -29,6 +29,12 @@ import javax.persistence.PreUpdate;
 @MappedSuperclass
 public class SecureEntity {
 
+  /**
+   * The system property to be set when an application requires a unique, but system wide security
+   * hash. The system must ensure that thie hash value is constant indefinitely. If this value
+   * changes after an entity has been secured, there is no recovery mechanism.
+   */
+  public static final String SECURITY_HASH_PROPERTY = "com.anosym.secureentity.hash";
   private static final long serialVersionUID = IdGenerator.serialVersionUID(SecureEntity.class);
   private static final String SECURITY_HASH = IdGenerator.serialVersionUID(SecureEntity.class).toString();
 
@@ -41,7 +47,7 @@ public class SecureEntity {
    * @return the hash to be used for a secure entity class.
    */
   protected String getSecurityHash() {
-    return SECURITY_HASH;
+    return System.getProperty(SECURITY_HASH_PROPERTY, SECURITY_HASH);
   }
 
   @PrePersist
