@@ -157,6 +157,18 @@ public class JFlemaxController {
     return getUserAgent(userAgentHeader);
   }
 
+  /**
+   * Returns the applications full url, including the context path attached.
+   *
+   * @return
+   */
+  public static String getApplicationUrl() {
+    String host = getRequestHeader("host");
+    System.out.println("getApplicationUrl: " + host);
+    String context = getContextPath();
+    return host + context;
+  }
+
   public static UserAgent getCurrentUserAgent() {
     String userAgentHeader = getRequestHeader("User-Agent");
     if (userAgentHeader == null) {
