@@ -25,7 +25,7 @@ public class PrincipalInfo extends BasicInfo {
     this.principalMethod = principalMethod;
   }
 
-  public <T extends UserPrinciple> T getUserPrinciple() {
+  public <T> T getUserPrinciple() {
     try {
       return (T) principalMethod.invoke(getController(), new Object[]{});
     } catch (IllegalAccessException ex) {

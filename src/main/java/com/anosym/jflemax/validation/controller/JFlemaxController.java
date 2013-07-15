@@ -7,7 +7,6 @@ package com.anosym.jflemax.validation.controller;
 import com.anosym.jflemax.validation.PageInformation;
 import com.anosym.jflemax.validation.RequestInfo;
 import com.anosym.jflemax.validation.RequestStatus;
-import com.anosym.jflemax.validation.UserPrinciple;
 import com.anosym.jflemax.validation.annotation.JsfPhaseIdOption;
 import com.anosym.jflemax.validation.annotation.LoginStatus;
 import com.anosym.jflemax.validation.annotation.RedirectStatus;
@@ -40,7 +39,7 @@ public class JFlemaxController {
     return IGNORE_VALIDATION;
   }
 
-  public final <T extends UserPrinciple> T getPrinciple() {
+  public final <T> T getPrinciple() {
     if (PageInformation.getPageProcessor().getPrincipalInfo() != null) {
       return PageInformation.getPageProcessor().getPrincipalInfo().getUserPrinciple();
     }
@@ -401,6 +400,14 @@ public class JFlemaxController {
 
   public static boolean isAjaxRequest() {
     return FacesContext.getCurrentInstance().getPartialViewContext().isAjaxRequest();
+  }
+
+  public static boolean isLocalHost() {
+    String ip = getRequestHeader("host");
+    if (ip != null && ip.contains("//")) {
+      ip = ip.substring(ip.indexOf("//") + 2);
+    }
+    return ip != null && (ip.contains("localhost") || ip.startsWith("192.") || ip.startsWith("127.0.0.1"));
   }
 
   public static String getParameter(String key) {
