@@ -34,7 +34,7 @@ public abstract class BasicInfo {
     if (controllerClass != null) {
       Named named = controllerClass.getAnnotation(Named.class);
       if (named != null) {
-        return JFlemaxController.findManagedBean(named.value());
+        return JFlemaxController.findManagedBean(controllerClass);
       }
     }
     return null;

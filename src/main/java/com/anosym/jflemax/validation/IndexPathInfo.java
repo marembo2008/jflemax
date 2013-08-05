@@ -4,7 +4,6 @@
  */
 package com.anosym.jflemax.validation;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,11 +27,7 @@ public class IndexPathInfo extends BasicInfo {
   public String getIndexPath() {
     try {
       return (String) indexPathMethod.invoke(getController(), new Object[]{});
-    } catch (IllegalAccessException ex) {
-      Logger.getLogger(PrincipalInfo.class.getName()).log(Level.SEVERE, null, ex);
-    } catch (IllegalArgumentException ex) {
-      Logger.getLogger(PrincipalInfo.class.getName()).log(Level.SEVERE, null, ex);
-    } catch (InvocationTargetException ex) {
+    } catch (Exception ex) {
       Logger.getLogger(PrincipalInfo.class.getName()).log(Level.SEVERE, null, ex);
     }
     return null;

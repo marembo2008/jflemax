@@ -28,11 +28,7 @@ public class PrincipalInfo extends BasicInfo {
   public <T> T getUserPrinciple() {
     try {
       return (T) principalMethod.invoke(getController(), new Object[]{});
-    } catch (IllegalAccessException ex) {
-      Logger.getLogger(PrincipalInfo.class.getName()).log(Level.SEVERE, null, ex);
-    } catch (IllegalArgumentException ex) {
-      Logger.getLogger(PrincipalInfo.class.getName()).log(Level.SEVERE, null, ex);
-    } catch (InvocationTargetException ex) {
+    } catch (Exception ex) {
       Logger.getLogger(PrincipalInfo.class.getName()).log(Level.SEVERE, null, ex);
     }
     return null;

@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.faces.event.PhaseId;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -111,6 +113,25 @@ public class PageInformation implements Serializable {
   public void processController(Class<?> cls) {
     try {
       addRequest(cls);
+      //scan for Principal info
+      Method[] ms = cls.getMethods();
+      if (pageInformation.principalInfo == null) {
+        for (Method method : ms) {
+          if (method.getAnnotation(Principal.class) != null) {
+            pageInformation.principalInfo = new PrincipalInfo(cls, method);
+            break;
+          }
+        }
+      }
+      //scan for index path
+      if (pageInformation.indexPathInfo == null) {
+        for (Method method : ms) {
+          if (method.getAnnotation(IndexPath.class) != null) {
+            pageInformation.indexPathInfo = new IndexPathInfo(cls, method);
+            break;
+          }
+        }
+      }
     } catch (Exception e) {
       Logger.getLogger(PageInformation.class.getSimpleName()).log(Level.SEVERE, cls.getName() + "", e);
     }
@@ -182,6 +203,21 @@ public class PageInformation implements Serializable {
         infos = onRequestInfos.get(normalizedPage);
       }
       {
+        //check for relative path universal requests such as /main/*
+        final Pattern p = Pattern.compile("[^/]/");
+        final Matcher m = p.matcher(page);
+        while (m.find()) {
+          String mainPage = (page.substring(0, m.end()));
+          //check if this page belongs to any of the parent which may have been specified.
+          Set<RequestInfo> _uInfo = onRequestInfos.get(mainPage);
+          if (_uInfo != null) {
+            if (infos == null) {
+              infos = _uInfo;
+            } else {
+              infos.addAll(_uInfo);
+            }
+          }
+        }
         //add the universal requests too?
         Set<RequestInfo> _uInfo = onRequestInfos.get("*");
         if (infos != null) {

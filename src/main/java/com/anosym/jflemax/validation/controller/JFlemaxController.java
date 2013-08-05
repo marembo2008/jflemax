@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.el.ELResolver;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseId;
@@ -75,6 +76,7 @@ public class JFlemaxController {
       }
       FacesContext context = FacesContext.getCurrentInstance();
       context.getExternalContext().redirect(to);
+      context.responseComplete();
     } catch (IOException ex) {
       java.util.logging.Logger.getLogger(JFlemaxController.class.getName()).log(Level.SEVERE, null, ex);
     }
@@ -389,8 +391,9 @@ public class JFlemaxController {
     try {
       String name = beanClass.getSimpleName();
       name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
-      Object o = facesContext.getApplication().getELResolver().
-              getValue(facesContext.getELContext(), null, name);
+      ELResolver eLResolver = facesContext.getApplication().getELResolver();
+      Object o = eLResolver.getValue(facesContext.getELContext(), null, name);
+      System.err.println("findManagedBean: resolution state for: " + name + " = " + facesContext.getELContext().isPropertyResolved());
       return beanClass.cast(o);
     } catch (Exception e) {
       logError(e);
