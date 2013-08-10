@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.anosym.jflemax.jpa.converter;
+package com.anosym.jflemax.jsf.converter;
 
 import com.anosym.jflemax.jpa.Text;
 import javax.faces.component.UIComponent;
