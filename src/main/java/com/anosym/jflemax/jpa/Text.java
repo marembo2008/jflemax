@@ -249,7 +249,7 @@ public class Text implements Serializable, CharSequence {
 
   @Override
   public String toString() {
-    return value.toString();
+    return value;
   }
 
   public char[] toCharArray() {

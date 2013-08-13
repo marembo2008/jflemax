@@ -38,6 +38,43 @@ public class JpaUtilTest {
     }
   }
 
+  @Entity
+  public static class JpaEntityMethodTest {
+
+    private String id;
+    private String data;
+
+    public JpaEntityMethodTest() {
+    }
+
+    public JpaEntityMethodTest(String id, String data) {
+      this.id = id;
+      this.data = data;
+    }
+
+    @Id
+    public String getId() {
+      return id;
+    }
+
+    public void setId(String id) {
+      this.id = id;
+    }
+
+    public String getData() {
+      return data;
+    }
+
+    public void setData(String data) {
+      this.data = data;
+    }
+
+    @Override
+    public String toString() {
+      return "JpaEntity{" + "id=" + id + ", data=" + data + '}';
+    }
+  }
+
   public JpaUtilTest() {
   }
 
@@ -53,6 +90,15 @@ public class JpaUtilTest {
   public void testGetEntityId() {
     System.out.println("testGetEntityId................");
     JpaEntity entity = new JpaEntity("4247282", "My jpa entty test");
+    String actual = JpaUtil.getEntityId(entity);
+    String expected = "4247282";
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testGetEntityId_method() {
+    System.out.println("testGetEntityId................");
+    JpaEntityMethodTest entity = new JpaEntityMethodTest("4247282", "My jpa entty test");
     String actual = JpaUtil.getEntityId(entity);
     String expected = "4247282";
     Assert.assertEquals(expected, actual);
