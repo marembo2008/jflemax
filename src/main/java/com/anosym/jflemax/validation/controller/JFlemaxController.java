@@ -40,26 +40,26 @@ public class JFlemaxController {
     return IGNORE_VALIDATION;
   }
 
-  public final <T> T getPrinciple() {
+  public static <T> T getPrinciple() {
     if (PageInformation.getPageProcessor().getPrincipalInfo() != null) {
       return PageInformation.getPageProcessor().getPrincipalInfo().getUserPrinciple();
     }
     return null;
   }
 
-  public final String indexPath() {
+  public static String indexPath() {
     if (PageInformation.getPageProcessor().getIndexPathInfo() != null) {
       return PageInformation.getPageProcessor().getIndexPathInfo().getIndexPath();
     }
     return null;
   }
 
-  public String getContext() {
+  public static String getContext() {
     FacesContext context = FacesContext.getCurrentInstance();
     return ((ServletContext) context.getExternalContext().getContext()).getContextPath();
   }
 
-  public void redirect(String to) {
+  public static void redirect(String to) {
     try {
       String referringPath = getReferringPath();
       if (referringPath != null && referringPath.equals(to)) {
@@ -82,7 +82,7 @@ public class JFlemaxController {
     }
   }
 
-  public void externalRedirect(String to) {
+  public static void externalRedirect(String to) {
     try {
       if (!to.startsWith("http")) {
         to = "http://" + to;
@@ -94,7 +94,7 @@ public class JFlemaxController {
     }
   }
 
-  public PageInformation getPageInformation() {
+  public static PageInformation getPageInformation() {
     return PageInformation.getPageProcessor();
   }
 
@@ -147,7 +147,7 @@ public class JFlemaxController {
     return null;
   }
 
-  public UserAgent getUserAgent() {
+  public static UserAgent getUserAgent() {
     String userAgentHeader = getRequestHeader("User-Agent");
     if (userAgentHeader == null) {
       userAgentHeader = getRequestHeader("user-agent");
@@ -209,7 +209,7 @@ public class JFlemaxController {
     return null;
   }
 
-  public HttpSession getCurrentSession() {
+  public static HttpSession getCurrentSession() {
     return (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(true);
   }
 
