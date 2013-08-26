@@ -413,6 +413,12 @@ public class JFlemaxController {
     return ip != null && (ip.contains("localhost") || ip.startsWith("192.") || ip.startsWith("127.0.0.1"));
   }
 
+  public static boolean isSessionInvalidated() {
+    ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+    HttpServletRequest request = (HttpServletRequest) externalContext.getRequest();
+    return request != null && request.getRequestedSessionId() != null && !request.isRequestedSessionIdValid();
+  }
+
   public static String getParameter(String key) {
     FacesContext context = FacesContext.getCurrentInstance();
     HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
