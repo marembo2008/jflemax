@@ -22,13 +22,13 @@ public class PositiveNumberValidator implements Validator {
   public void validate(FacesContext fc, UIComponent uic, Object value) throws ValidatorException {
     try {
       if (new BigDecimal(value.toString()).signum() < 1) {
-        FacesMessage msg = new FacesMessage("Validation failed.",
-                "Number must be strictly positive");
+        FacesMessage msg = new FacesMessage("Validation failed. Number must be strictly positive",
+                "Validation failed. Number must be strictly positive");
         msg.setSeverity(FacesMessage.SEVERITY_ERROR);
         throw new ValidatorException(msg);
       }
     } catch (NumberFormatException ex) {
-      FacesMessage msg = new FacesMessage("Validation failed.", "Not a number");
+      FacesMessage msg = new FacesMessage("Validation failed. Not a number", "Validation failed. Not a number");
       msg.setSeverity(FacesMessage.SEVERITY_ERROR);
       throw new ValidatorException(msg);
     }
