@@ -75,6 +75,13 @@ public class JFlemaxController {
         to = getContext() + to;
       }
       FacesContext context = FacesContext.getCurrentInstance();
+      if (!to.contains("?faces-redirect=true")) {
+        if (to.contains("?")) {
+          to += "&faces-redirect=true";
+        } else {
+          to += "?faces-redirect=true";
+        }
+      }
       context.getExternalContext().redirect(to);
       context.responseComplete();
     } catch (IOException ex) {
