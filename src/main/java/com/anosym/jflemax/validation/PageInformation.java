@@ -4,6 +4,7 @@
  */
 package com.anosym.jflemax.validation;
 
+import com.anosym.jflemax.validation.annotation.CacheControl;
 import com.anosym.jflemax.validation.annotation.Debug;
 import com.anosym.jflemax.validation.annotation.IndexPath;
 import com.anosym.jflemax.validation.annotation.JsfPhase;
@@ -68,6 +69,10 @@ public class PageInformation implements Serializable {
   private boolean debugging;
   private Calendar lastReload = Calendar.getInstance();
   private int reloadPeriod;
+  /**
+   * Information relating to page caches.
+   */
+  private List<CacheControlInfo> cacheControlInfos;
 
   public void setDebugging(boolean debugging) {
     this.debugging = debugging;
@@ -327,6 +332,33 @@ public class PageInformation implements Serializable {
     return pageInformation;
   }
 
+  private static void processCacheControlInfo(org.reflections.Reflections reflections, PageInformation pageInformation) {
+    Set<Class<?>> annotatedBeans = reflections.getTypesAnnotatedWith(CacheControl.class);
+    if (annotatedBeans != null) {
+      for (Class<?> c : annotatedBeans) {
+        CacheControl cc = c.getAnnotation(CacheControl.class);
+        if (cc != null) {
+          if (pageInformation.cacheControlInfos == null) {
+            pageInformation.cacheControlInfos = new ArrayList<CacheControlInfo>();
+          }
+          pageInformation.cacheControlInfos.add(new CacheControlInfo(cc.urls(), cc.cached()));
+        }
+      }
+    }
+  }
+
+  public static boolean isCurrentPageCached(String page) {
+    if (pageInformation.cacheControlInfos != null) {
+      for (CacheControlInfo cci : pageInformation.cacheControlInfos) {
+        if (cci.isCacheControlled(page)) {
+          return cci.isCached();
+        }
+      }
+    }
+    //by default the current page is cached.
+    return true;
+  }
+
   public static void onApplicationStart() {
     pageInformation = new PageInformation();
     org.reflections.Reflections reflections = new Reflections(new ConfigurationBuilder()
@@ -337,6 +369,8 @@ public class PageInformation implements Serializable {
             .setScanners(new SubTypesScanner(),
             new TypeAnnotationsScanner(),
             new ResourcesScanner()));
+    //process cached controlls.
+    processCacheControlInfo(reflections, pageInformation);
     //scan for onrequests and onrequest
     Set<Class<?>> annotatedBeans = reflections.getTypesAnnotatedWith(OnRequests.class);
     Set<Class<?>> debugBeans = reflections.getTypesAnnotatedWith(Debug.class);
