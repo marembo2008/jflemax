@@ -59,6 +59,14 @@ public class JFlemaxController {
     return ((ServletContext) context.getExternalContext().getContext()).getContextPath();
   }
 
+  public static String getCurrentSessionId() {
+    HttpSession httpSession = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(true);
+    if (httpSession != null) {
+      return httpSession.getId();
+    }
+    return null;
+  }
+
   public static void redirect(String to) {
     try {
       String referringPath = getReferringPath();
