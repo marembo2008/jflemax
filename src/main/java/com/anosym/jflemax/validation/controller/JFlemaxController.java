@@ -60,7 +60,10 @@ public class JFlemaxController {
   }
 
   public static String getCurrentSessionId() {
-    HttpSession httpSession = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(true);
+    HttpSession httpSession = (HttpSession) FacesContext
+            .getCurrentInstance()
+            .getExternalContext()
+            .getSession(true);
     if (httpSession != null) {
       return httpSession.getId();
     }
