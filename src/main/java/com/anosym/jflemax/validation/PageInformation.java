@@ -73,6 +73,11 @@ public class PageInformation implements Serializable {
    * Information relating to page caches.
    */
   private List<CacheControlInfo> cacheControlInfos;
+  private ViewExpiredPages viewExpiredPages;
+
+  public ViewExpiredPages getViewExpiredPages() {
+    return viewExpiredPages;
+  }
 
   public void setDebugging(boolean debugging) {
     this.debugging = debugging;
@@ -347,6 +352,23 @@ public class PageInformation implements Serializable {
     }
   }
 
+  private static void processViewExpiredPages(org.reflections.Reflections reflections, PageInformation pageInformation) {
+    Set<Class<?>> annotatedBeans = reflections.getTypesAnnotatedWith(com.anosym.jflemax.validation.annotation.ViewExpiredPages.class);
+    if (annotatedBeans != null) {
+      String pages[] = {};
+      for (Class<?> c : annotatedBeans) {
+        com.anosym.jflemax.validation.annotation.ViewExpiredPages viewExpiredPages =
+                c.getAnnotation(com.anosym.jflemax.validation.annotation.ViewExpiredPages.class);
+        CacheControl cc = c.getAnnotation(CacheControl.class);
+        if (viewExpiredPages != null) {
+          pages = Arrays.copyOf(pages, pages.length + viewExpiredPages.pages().length);
+          System.arraycopy(viewExpiredPages.pages(), 0, pages, (pages.length - viewExpiredPages.pages().length), viewExpiredPages.pages().length);
+        }
+      }
+      pageInformation.viewExpiredPages = new ViewExpiredPages(pages);
+    }
+  }
+
   public static boolean isCurrentPageCached(String page) {
     if (pageInformation.cacheControlInfos != null) {
       for (CacheControlInfo cci : pageInformation.cacheControlInfos) {
@@ -371,6 +393,7 @@ public class PageInformation implements Serializable {
             new ResourcesScanner()));
     //process cached controlls.
     processCacheControlInfo(reflections, pageInformation);
+    processViewExpiredPages(reflections, pageInformation);
     //scan for onrequests and onrequest
     Set<Class<?>> annotatedBeans = reflections.getTypesAnnotatedWith(OnRequests.class);
     Set<Class<?>> debugBeans = reflections.getTypesAnnotatedWith(Debug.class);
