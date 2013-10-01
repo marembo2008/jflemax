@@ -11,6 +11,7 @@ import com.anosym.jflemax.validation.annotation.JsfPhaseIdOption;
 import com.anosym.jflemax.validation.annotation.LoginStatus;
 import com.anosym.jflemax.validation.annotation.RedirectStatus;
 import com.anosym.jflemax.validation.browser.UserAgent;
+import com.anosym.utilities.Utility;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -458,5 +459,33 @@ public class JFlemaxController {
 
   public static void logMessage(String title, String message) {
     Logger.getLogger(JFlemaxController.class.getName()).log(Level.INFO, title + "{0}", message);
+  }
+
+  public static HttpServletRequest getRequest(FacesContext context) {
+    return (HttpServletRequest) context.getExternalContext().getRequest();
+  }
+
+  /**
+   * From OmniFaces Library. Returns the Internet Protocol (IP) address of the client that sent the
+   * request. This will first check the
+   * <code>X-Forwarded-For</code> request header and if it's present, then return its first IP
+   * address, else just return {@link HttpServletRequest#getRemoteAddress()} unmodified.
+   *
+   * @return The IP address of the client.
+   * @see HttpServletRequest#getRemoteAddress()
+   * @since 1.2
+   */
+  public static String getRemoteAddress() {
+    String forwardedFor = getRequestHeader("X-Forwarded-For");
+    if (!Utility.isNullOrEmpty(forwardedFor)) {
+      return forwardedFor.split("\\s*,\\s*", 2)[0]; // It's a comma separated string: client,proxy1,proxy2,...
+    }
+    return getRequest(FacesContext.getCurrentInstance()).getRemoteAddr();
+  }
+
+  public static String getCurrentSessionClientIp() {
+    String ipAddress = getRemoteAddress();
+    System.out.println("CurrentSessionClientIp:" + ipAddress);
+    return ipAddress;
   }
 }
