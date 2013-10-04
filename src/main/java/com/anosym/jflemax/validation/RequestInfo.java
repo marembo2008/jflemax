@@ -4,6 +4,7 @@
  */
 package com.anosym.jflemax.validation;
 
+import com.anosym.jflemax.validation.annotation.ExecuteCycle;
 import com.anosym.jflemax.validation.annotation.LoginStatus;
 import com.anosym.jflemax.validation.annotation.RedirectStatus;
 import com.anosym.utilities.IdGenerator;
@@ -30,6 +31,7 @@ public class RequestInfo implements Serializable {
   private RedirectStatus redirectStatus;
   private int priority;
   private JsfPhaseInfo[] jsfPhaseInfos;
+  private ExecuteCycle executeCycle;
 
   public RequestInfo() {
     toPages = new HashSet<String>();
@@ -38,7 +40,8 @@ public class RequestInfo implements Serializable {
   public RequestInfo(
           String controller, Set<String> toPages, String onRequestMethod,
           String redirectPage, boolean redirect, RequestStatus requestStatus, LoginStatus loginStatus,
-          String[] excludedPages, RedirectStatus redirectStatus, JsfPhaseInfo[] jsfPhaseInfos) {
+          String[] excludedPages, RedirectStatus redirectStatus, JsfPhaseInfo[] jsfPhaseInfos,
+          ExecuteCycle executeCycle) {
     this.controller = controller;
     this.toPages = toPages;
     this.onRequestMethod = onRequestMethod;
@@ -49,10 +52,19 @@ public class RequestInfo implements Serializable {
     this.excludedPages = excludedPages;
     this.redirectStatus = redirectStatus;
     this.jsfPhaseInfos = jsfPhaseInfos;
+    this.executeCycle = executeCycle;
   }
 
   public void setPriority(int priority) {
     this.priority = priority;
+  }
+
+  public void setExecuteCycle(ExecuteCycle executeCycle) {
+    this.executeCycle = executeCycle;
+  }
+
+  public ExecuteCycle getExecuteCycle() {
+    return executeCycle;
   }
 
   public int getPriority() {

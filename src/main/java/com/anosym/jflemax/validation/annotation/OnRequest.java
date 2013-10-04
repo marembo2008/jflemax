@@ -108,4 +108,13 @@ public @interface OnRequest {
    * @return
    */
   JsfPhase[] jsfPhases() default {};
+
+  /**
+   * Determines if this request should be executed every time it found to comply with current
+   * request. If marked as to be executed once, it will be executed once and then removed from the
+   * request cycle.
+   *
+   * @return
+   */
+  ExecuteCycle execute() default ExecuteCycle.ALWAYS;
 }

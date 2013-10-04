@@ -7,6 +7,7 @@ package com.anosym.jflemax.validation.controller;
 import com.anosym.jflemax.validation.PageInformation;
 import com.anosym.jflemax.validation.RequestInfo;
 import com.anosym.jflemax.validation.RequestStatus;
+import com.anosym.jflemax.validation.annotation.ExecuteCycle;
 import com.anosym.jflemax.validation.annotation.JsfPhaseIdOption;
 import com.anosym.jflemax.validation.annotation.LoginStatus;
 import com.anosym.jflemax.validation.annotation.RedirectStatus;
@@ -290,6 +291,11 @@ public class JFlemaxController {
               }
             } catch (Exception e) {
               logError(e);
+            } finally {
+              //check if the request is to be executed only once, and then removed from the queue
+              if (requestInfo.getExecuteCycle() == ExecuteCycle.ONCE) {
+                pageInformation.removeFromQueue(requestInfo);
+              }
             }
           }
         }
@@ -492,7 +498,8 @@ public class JFlemaxController {
   }
 
   /**
-   * Returns all context relative paths of all resources that end in .xhtml
+   * Returns all context relative paths of all resources that end in .xhtml This method depends on
+   * the current web application request context.
    *
    * @return
    */

@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -185,7 +186,7 @@ public class PageInformation implements Serializable {
         RequestInfo info = new RequestInfo(controller, new HashSet<String>(Arrays.asList(toPages)),
                 onRequest.onRequestMethod(), onRequest.redirectPage(), onRequest.redirect(),
                 onRequest.requestStatus(), onRequest.logInStatus(), onRequest.excludedPages(),
-                onRequest.redirectStatus(), phaseInfos);
+                onRequest.redirectStatus(), phaseInfos, onRequest.execute());
         info.setPriority(onRequest.priority());
         for (String toPage : toPages) {
           Set<RequestInfo> requestInfos = onRequestInfos.get(toPage);
@@ -249,7 +250,7 @@ public class PageInformation implements Serializable {
     return new LinkedHashSet<RequestInfo>(list);
   }
 
-  public Set<RequestInfo> getRequestInfos(String page, LoginStatus loginStatus) {
+  public synchronized Set<RequestInfo> getRequestInfos(String page, LoginStatus loginStatus) {
     Set<RequestInfo> infos = getRequestInfos(page);
     String normalizedPage = page.contains(".") ? page.substring(0, page.lastIndexOf(".")) : page;
     try {
@@ -315,6 +316,20 @@ public class PageInformation implements Serializable {
       Logger.getLogger(PageInformation.class.getSimpleName()).log(Level.SEVERE, page, e);
     }
     return infos;
+  }
+
+  public synchronized void removeFromQueue(RequestInfo requestInfo) {
+    Collection<Set<RequestInfo>> values = onRequestInfos.values();
+    for (Iterator<Set<RequestInfo>> i = values.iterator(); i.hasNext();) {
+      Set<RequestInfo> set = i.next();
+      for (Iterator<RequestInfo> ii = set.iterator(); ii.hasNext();) {
+        RequestInfo info = ii.next();
+        if (info.equals(requestInfo)) {
+          ii.remove();
+          break;
+        }
+      }
+    }
   }
 
   private boolean loadPageInformation() {
