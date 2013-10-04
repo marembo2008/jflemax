@@ -12,9 +12,11 @@ import com.anosym.jflemax.validation.annotation.LoginStatus;
 import com.anosym.jflemax.validation.annotation.RedirectStatus;
 import com.anosym.jflemax.validation.browser.UserAgent;
 import com.anosym.utilities.Utility;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -487,5 +489,34 @@ public class JFlemaxController {
     String ipAddress = getRemoteAddress();
     System.out.println("CurrentSessionClientIp:" + ipAddress);
     return ipAddress;
+  }
+
+  /**
+   * Returns all context relative paths of all resources that end in .xhtml
+   *
+   * @return
+   */
+  public static List<String> applicationResourcePaths() {
+    HttpSession session = getCurrentSession();
+    ServletContext sc = session.getServletContext();
+    String path = sc.getRealPath("/");
+    if (!Utility.isNullOrEmpty(path)) {
+      List<String> resources = new ArrayList<String>();
+      getResources(path, new File(path), resources);
+    }
+    return Collections.EMPTY_LIST;
+  }
+
+  private static void getResources(String realPath, File path, List<String> resources) {
+    if (path.isDirectory()) {
+      File[] paths = path.listFiles();
+      for (File path_d : paths) {
+        getResources(realPath, path_d, resources);
+      }
+    } else if (path.isFile() && path.getName().endsWith(".xhtml")) {
+      String actualPath = path.getAbsolutePath();
+      String contextPath = actualPath.substring(realPath.length());
+      resources.add(contextPath);
+    }
   }
 }

@@ -4,7 +4,6 @@
  */
 package com.anosym.jflemax.validation;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,7 +26,9 @@ public class PrincipalInfo extends BasicInfo {
 
   public <T> T getUserPrinciple() {
     try {
-      return (T) principalMethod.invoke(getController(), new Object[]{});
+      if (principalMethod != null) {
+        return (T) principalMethod.invoke(getController(), new Object[]{});
+      }
     } catch (Exception ex) {
       Logger.getLogger(PrincipalInfo.class.getName()).log(Level.SEVERE, null, ex);
     }
