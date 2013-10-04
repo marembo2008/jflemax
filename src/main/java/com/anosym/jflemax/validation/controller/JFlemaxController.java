@@ -507,9 +507,11 @@ public class JFlemaxController {
     HttpSession session = getCurrentSession();
     ServletContext sc = session.getServletContext();
     String path = sc.getRealPath("/");
+    System.out.println("Application Resource path: " + path);
     if (!Utility.isNullOrEmpty(path)) {
       List<String> resources = new ArrayList<String>();
       getResources(path, new File(path), resources);
+      return resources;
     }
     return Collections.EMPTY_LIST;
   }
