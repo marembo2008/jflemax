@@ -525,6 +525,7 @@ public class JFlemaxController {
     } else if (path.isFile() && path.getName().endsWith(".xhtml")) {
       String actualPath = path.getAbsolutePath();
       String contextPath = actualPath.substring(realPath.length());
+      contextPath = contextPath.startsWith("/") ? contextPath : "/" + contextPath;
       resources.add(contextPath);
     }
   }
