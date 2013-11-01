@@ -24,7 +24,10 @@ public class RequestInfo implements Serializable {
   private Set<String> toPages;
   private String onRequestMethod;
   private String redirectPage;
+  private String redirectFailurePage;
   private boolean redirect;
+  private boolean redirectOnResult;
+  private String redirectPages[];
   private RequestStatus requestStatus;
   private LoginStatus loginStatus;
   private String[] excludedPages;
@@ -41,7 +44,7 @@ public class RequestInfo implements Serializable {
           String controller, Set<String> toPages, String onRequestMethod,
           String redirectPage, boolean redirect, RequestStatus requestStatus, LoginStatus loginStatus,
           String[] excludedPages, RedirectStatus redirectStatus, JsfPhaseInfo[] jsfPhaseInfos,
-          ExecuteCycle executeCycle) {
+          ExecuteCycle executeCycle, String redirectFailurePage, boolean redirectOnResult, String[] redirectPages) {
     this.controller = controller;
     this.toPages = toPages;
     this.onRequestMethod = onRequestMethod;
@@ -53,6 +56,25 @@ public class RequestInfo implements Serializable {
     this.redirectStatus = redirectStatus;
     this.jsfPhaseInfos = jsfPhaseInfos;
     this.executeCycle = executeCycle;
+    this.redirectFailurePage = redirectFailurePage;
+    this.redirectOnResult = redirectOnResult;
+    this.redirectPages = redirectPages;
+  }
+
+  public void setRedirectPages(String[] redirectPages) {
+    this.redirectPages = redirectPages;
+  }
+
+  public boolean isRedirectOnResult() {
+    return redirectOnResult;
+  }
+
+  public void setRedirectOnResult(boolean redirectOnResult) {
+    this.redirectOnResult = redirectOnResult;
+  }
+
+  public String[] getRedirectPages() {
+    return redirectPages;
   }
 
   public void setPriority(int priority) {
@@ -85,6 +107,14 @@ public class RequestInfo implements Serializable {
 
   public void setRedirectStatus(RedirectStatus redirectStatus) {
     this.redirectStatus = redirectStatus;
+  }
+
+  public void setRedirectFailurePage(String redirectFailurePage) {
+    this.redirectFailurePage = redirectFailurePage;
+  }
+
+  public String getRedirectFailurePage() {
+    return redirectFailurePage;
   }
 
   public String[] getExcludedPages() {

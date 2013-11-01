@@ -11,5 +11,6 @@ package com.anosym.jflemax.validation.annotation;
 public enum RedirectStatus {
 
   ON_SUCCESS,
-  ON_FAILURE;
+  ON_FAILURE,
+  ALWAYS;
 }

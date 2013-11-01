@@ -6,7 +6,6 @@ package com.anosym.jflemax.geometry;
 
 import com.anosym.utilities.IdGenerator;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 

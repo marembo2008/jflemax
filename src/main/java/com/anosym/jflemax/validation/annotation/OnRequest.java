@@ -50,9 +50,34 @@ public @interface OnRequest {
    * onRequestMethod has failed, the redirector will redirect to the default initial page of the web
    * application.
    *
+   * If RedirectStatus is always, then this is considered as the success redirect page.
+   *
    * @return
    */
   String redirectPage() default "";
+
+  /**
+   * If RedirectStatus is always, this page is used for failure redirects.
+   *
+   * @return
+   */
+  String redirectFailurePage() default "";
+
+  /**
+   * The value of the result determines the page to direct to. This is like {@link #redirect() }
+   * true, but instead of expecting a boolean result, expects an integer result. This only works
+   * with {@link #redirectStatus() } equal {@link RedirectStatus#ALWAYS}
+   *
+   * @return
+   */
+  boolean redirectOnResult() default false;
+
+  /**
+   * If redirectOnResult is true, then the following pages determines the page to redirect to.
+   *
+   * @return
+   */
+  String[] redirectPages() default {};
 
   /**
    * If true, the redirect will be executed. This occurs if and only if the onRequestmethod fails.

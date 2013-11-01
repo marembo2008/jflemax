@@ -18,8 +18,10 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -329,7 +331,8 @@ public class JFlemaxController {
       FacesContext context = FacesContext.getCurrentInstance();
       boolean ajaxRequest = context.getPartialViewContext().isAjaxRequest();
       boolean loginRequest = (getPrinciple() != null);
-      List<RequestInfo> infos = new ArrayList<RequestInfo>();
+      Map<RequestInfo, Boolean> infos = new HashMap<RequestInfo, Boolean>();
+      Map<RequestInfo, Integer> infos0 = new HashMap<RequestInfo, Integer>();
       System.out.println("Request Infos: " + infos);
       for (RequestInfo requestInfo : requestInfos) {
         RequestStatus requestStatus = requestInfo.getRequestStatus();
@@ -349,12 +352,21 @@ public class JFlemaxController {
               Method validatingMethod = controllerClass.getDeclaredMethod(requestInfo.getOnRequestMethod(), new Class<?>[]{});
               if (validatingMethod != null) {
                 Object res = validatingMethod.invoke(controller, new Object[]{});
-                if (res != null && res instanceof Boolean) {
-                  Boolean state = (Boolean) res;
-                  boolean doRedirect = (state && requestInfo.getRedirectStatus() == RedirectStatus.ON_SUCCESS)
-                          || (!state && requestInfo.getRedirectStatus() == RedirectStatus.ON_FAILURE);
-                  if (doRedirect && requestInfo.isRedirect()) {
-                    infos.add(requestInfo);
+                if (res != null) {
+                  if (res instanceof Boolean) {
+                    Boolean state = (Boolean) res;
+                    boolean doRedirect = (state && requestInfo.getRedirectStatus() == RedirectStatus.ON_SUCCESS)
+                            || (!state && requestInfo.getRedirectStatus() == RedirectStatus.ON_FAILURE)
+                            || requestInfo.getRedirectStatus() == RedirectStatus.ALWAYS;
+                    if (doRedirect && requestInfo.isRedirect()) {
+                      infos.put(requestInfo, state);
+                    }
+                  } else if (res instanceof Integer) {
+                    Integer i = (Integer) res;
+                    boolean doRedirect = requestInfo.getRedirectStatus() == RedirectStatus.ALWAYS;
+                    if (doRedirect && requestInfo.isRedirectOnResult()) {
+                      infos0.put(requestInfo, i);
+                    }
                   }
                 }
               }
@@ -365,6 +377,56 @@ public class JFlemaxController {
         }
       }
       redirectRequest(infos, referingPath);
+      redirectRequest0(infos0, referingPath);
+    }
+  }
+
+  private void redirectRequest(Map<RequestInfo, Boolean> infos, String referingPath) {
+    for (Entry<RequestInfo, Boolean> requestInfos : infos.entrySet()) {
+      RequestInfo requestInfo = requestInfos.getKey();
+      String redirectPage = requestInfo.getRedirectPage();
+      if (requestInfo.getRedirectStatus() == RedirectStatus.ALWAYS && !requestInfos.getValue()) {
+        redirectPage = requestInfo.getRedirectFailurePage();
+      }
+      if (Utility.isNullOrEmpty(redirectPage)) {
+        redirectPage = indexPath();
+      } else {
+        if (!redirectPage.contains(".xhtml")) {
+          redirectPage += ".xhtml";
+        }
+      }
+      /**
+       * We should not redirect to the same page
+       */
+      if (!redirectPage.equals(referingPath)) {
+        if (!FacesContext.getCurrentInstance().getResponseComplete()) {
+          redirect(redirectPage);
+        }
+        break; //after first redirect, we move out since we cannot redirect to more than one page.
+      }
+    }
+  }
+
+  private void redirectRequest0(Map<RequestInfo, Integer> infos, String referingPath) {
+    for (Entry<RequestInfo, Integer> requestInfos : infos.entrySet()) {
+      RequestInfo requestInfo = requestInfos.getKey();
+      String redirectPage = requestInfo.getRedirectPages()[requestInfos.getValue()];
+      if (Utility.isNullOrEmpty(redirectPage)) {
+        redirectPage = indexPath();
+      } else {
+        if (!redirectPage.contains(".xhtml")) {
+          redirectPage += ".xhtml";
+        }
+      }
+      /**
+       * We should not redirect to the same page
+       */
+      if (!redirectPage.equals(referingPath)) {
+        if (!FacesContext.getCurrentInstance().getResponseComplete()) {
+          redirect(redirectPage);
+        }
+        break; //after first redirect, we move out since we cannot redirect to more than one page.
+      }
     }
   }
 
