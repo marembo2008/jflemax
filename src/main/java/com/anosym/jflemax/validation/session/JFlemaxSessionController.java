@@ -4,6 +4,9 @@
  */
 package com.anosym.jflemax.validation.session;
 
+import com.anosym.jflemax.validation.controller.JFlemaxController;
+import com.anosym.utilities.Utility;
+import com.anosym.utilities.geocode.CountryCode;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,15 +22,23 @@ import javax.servlet.http.HttpSessionListener;
 public class JFlemaxSessionController implements HttpSessionListener {
 
   private static final Map<String, Object> SESSION_USERS = new HashMap<String, Object>();
+  //get active sessions and countries.
+  private static final Map<String, String> CURRENT_ACTIVE_SESSIONS = new HashMap<String, String>();
 
   public void sessionCreated(HttpSessionEvent se) {
     //nothing to be done currently. Just ignore.
+    String sessionId = se.getSession().getId();
+    String ip = JFlemaxController.getCurrentSessionClientIp();
+    CountryCode country = Utility.findCountryCodeFromIpAddress(ip);
+    String name = country != null ? country.getName() : "No Country found for: " + ip;
+    CURRENT_ACTIVE_SESSIONS.put(sessionId, name);
   }
 
   public void sessionDestroyed(HttpSessionEvent se) {
     //remove any session object associated with session.
     String sessionId = se.getSession().getId();
     SESSION_USERS.remove(sessionId);
+    CURRENT_ACTIVE_SESSIONS.remove(sessionId);
   }
 
   public static void registerSessionPrinciple(String sessionId, Object principle) {
@@ -44,5 +55,9 @@ public class JFlemaxSessionController implements HttpSessionListener {
 
   public static <T> T getSessionUser(String sessionId) {
     return (T) SESSION_USERS.get(sessionId);
+  }
+
+  public static Collection<String> getCurrentActiveSessionInformation() {
+    return CURRENT_ACTIVE_SESSIONS.values();
   }
 }
