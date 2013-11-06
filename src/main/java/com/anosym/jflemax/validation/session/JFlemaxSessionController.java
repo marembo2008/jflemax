@@ -4,8 +4,8 @@
  */
 package com.anosym.jflemax.validation.session;
 
+import com.anosym.ip.mapping.IpMapping;
 import com.anosym.jflemax.validation.controller.JFlemaxController;
-import com.anosym.utilities.Utility;
 import com.anosym.utilities.geocode.CountryCode;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ public class JFlemaxSessionController implements HttpSessionListener {
     //nothing to be done currently. Just ignore.
     String sessionId = se.getSession().getId();
     String ip = JFlemaxController.getCurrentSessionClientIp();
-    CountryCode country = Utility.findCountryCodeFromIpAddress(ip);
+    CountryCode country = IpMapping.findCountryCodeFromIpAddress(ip);
     String name = country != null ? country.getName() : "No Country found for: " + ip;
     CURRENT_ACTIVE_SESSIONS.put(sessionId, name);
   }
