@@ -515,6 +515,20 @@ public class JFlemaxController {
     return paramValue;
   }
 
+  public static <T> T getRequestAttribute(String key) {
+    FacesContext context = FacesContext.getCurrentInstance();
+    HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+    T paramValue = (T) request.getAttribute(key);
+    return paramValue;
+  }
+
+  public static <T> T getSessionAttribute(String key) {
+    FacesContext context = FacesContext.getCurrentInstance();
+    HttpSession session = (HttpSession) context.getExternalContext().getSession(false);
+    T paramValue = (T) session.getAttribute(key);
+    return paramValue;
+  }
+
   public static void logError(Throwable error) {
     Logger.getLogger(JFlemaxController.class.getName()).log(Level.SEVERE, null, error);
   }
