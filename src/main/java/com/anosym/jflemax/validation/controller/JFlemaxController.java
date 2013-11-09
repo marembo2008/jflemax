@@ -152,8 +152,9 @@ public class JFlemaxController {
         int ix = referringPath.indexOf(url) + url.length();
         referringPath = referringPath.substring(ix);
       }
-      if (referringPath.contains(contextPath)) {
-        referringPath = referringPath.substring(referringPath.indexOf(contextPath) + contextPath.length() - 1);
+      if (!Utility.isNullOrEmpty(contextPath) && referringPath.contains(contextPath)) {
+        int ix = referringPath.indexOf(contextPath) + contextPath.length();
+        referringPath = referringPath.substring(ix);
       }
     }
     return referringPath;
