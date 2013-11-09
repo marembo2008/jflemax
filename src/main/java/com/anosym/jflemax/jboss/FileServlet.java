@@ -42,7 +42,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author BalusC
  * @link http://balusc.blogspot.com/2009/02/fileservlet-supporting-resume-and.html
  */
-@WebServlet(urlPatterns = {"/static/*"}, loadOnStartup = 1)
+@WebServlet(urlPatterns = {"/static/*"})
 public class FileServlet extends HttpServlet {
 //static path configuration for uploading the static content from
 

@@ -144,11 +144,17 @@ public class JFlemaxController {
    * @return
    */
   public static String getReferringPath() {
-    FacesContext context = FacesContext.getCurrentInstance();
     String referringPath = getRequestHeader("Referer");
-    String contextPath = ((ServletContext) context.getExternalContext().getContext()).getContextPath() + "/";
-    if (referringPath != null && referringPath.contains(contextPath)) {
-      referringPath = referringPath.substring(referringPath.indexOf(contextPath) + contextPath.length() - 1);
+    String contextPath = getContextPath();
+    String url = getApplicationUrl();
+    if (!Utility.isNullOrEmpty(referringPath)) {
+      if (referringPath.contains(url)) {
+        int ix = referringPath.indexOf(url) + url.length();
+        referringPath = referringPath.substring(ix);
+      }
+      if (referringPath.contains(contextPath)) {
+        referringPath = referringPath.substring(referringPath.indexOf(contextPath) + contextPath.length() - 1);
+      }
     }
     return referringPath;
   }
