@@ -24,6 +24,7 @@ public class JCurrentSession implements Serializable {
   private UserAgent userAgent;
 
   public JCurrentSession(String sessionId, String country) {
+    this();
     this.sessionId = sessionId;
     this.country = country;
   }
