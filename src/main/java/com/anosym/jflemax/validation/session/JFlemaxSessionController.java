@@ -6,7 +6,6 @@ package com.anosym.jflemax.validation.session;
 
 import com.anosym.ip.mapping.IpMapping;
 import com.anosym.jflemax.validation.controller.JFlemaxController;
-import com.anosym.utilities.Duplex;
 import com.anosym.utilities.geocode.CountryCode;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,15 +25,15 @@ public class JFlemaxSessionController implements HttpSessionListener {
 
   private static final Map<String, Object> SESSION_USERS = new HashMap<String, Object>();
   //get active sessions and countries.
-  private static final Map<String, Duplex<String, String>> CURRENT_ACTIVE_SESSIONS = new HashMap<String, Duplex<String, String>>();
+  private static final Map<String, JCurrentSession> CURRENT_ACTIVE_SESSIONS = new HashMap<String, JCurrentSession>();
 
   public void sessionCreated(HttpSessionEvent se) {
     //nothing to be done currently. Just ignore.
     String sessionId = se.getSession().getId();
     String ip = JFlemaxController.getCurrentSessionClientIp();
     CountryCode country = IpMapping.findCountryCodeFromIpAddress(ip);
-    String name = country != null ? country.getName() : "No Country found for: " + ip;
-    CURRENT_ACTIVE_SESSIONS.put(sessionId, new Duplex<String, String>(name, JFlemaxController.getRequestPath()));
+    String countryName = country != null ? country.getName() : "No Country found for: " + ip;
+    CURRENT_ACTIVE_SESSIONS.put(sessionId, new JCurrentSession(sessionId, countryName));
   }
 
   public void sessionDestroyed(HttpSessionEvent se) {
@@ -46,7 +45,9 @@ public class JFlemaxSessionController implements HttpSessionListener {
 
   public static void updateRequestPath(String sessionId, String requestPath) {
     try {
-      CURRENT_ACTIVE_SESSIONS.get(sessionId).setSecondValue(requestPath);
+      JCurrentSession currentSession = CURRENT_ACTIVE_SESSIONS.get(sessionId);
+      currentSession.setCurrentPage(requestPath);
+      currentSession.setUserAgent(JFlemaxController.getCurrentUserAgent());
     } catch (Exception e) {
       Logger.getLogger(JFlemaxSessionController.class.getName()).log(Level.SEVERE, sessionId, e);
     }
@@ -68,7 +69,8 @@ public class JFlemaxSessionController implements HttpSessionListener {
     return (T) SESSION_USERS.get(sessionId);
   }
 
-  public static Collection<Duplex<String, String>> getCurrentActiveSessionInformation() {
+  public static Collection<JCurrentSession> getCurrentActiveSessionInformation() {
     return CURRENT_ACTIVE_SESSIONS.values();
   }
+
 }

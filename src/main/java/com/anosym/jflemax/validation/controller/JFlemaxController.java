@@ -42,7 +42,7 @@ public class JFlemaxController {
   private static final String IGNORE_VALIDATION = "ignore_validate";
   public static final String APPLICATION_PACKAGE = "application_package";
 
-  public String getIGNORE_VALIDATION() {
+  public static String getIGNORE_VALIDATION() {
     return IGNORE_VALIDATION;
   }
 
