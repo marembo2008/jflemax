@@ -251,7 +251,7 @@ public class JFlemaxController {
         }
       } else if (userAgentHeader.contains("Mozilla")
               && userAgentHeader.contains("Windows")
-              && userAgentHeader.contains("trident/7.0")) {
+              && userAgentHeader.contains("Trident/7.0")) {
         //we are working with IE
         agent.setBrowserType("MSIE");
         //get the ie version
