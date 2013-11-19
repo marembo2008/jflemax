@@ -249,11 +249,16 @@ public class JFlemaxController {
           String version = userAgentHeader.substring(ix0, ix1);
           agent.setBrowserVersion(version);
         }
-      } else if (userAgentHeader.contains("Mozilla") && userAgentHeader.contains("Windows")) {
+      } else if (userAgentHeader.contains("Mozilla")
+              && userAgentHeader.contains("Windows")
+              && userAgentHeader.contains("trident/7.0")) {
         //we are working with IE
         agent.setBrowserType("MSIE");
         //get the ie version
-        int ix0 = userAgentHeader.indexOf("rv:") + 3;
+        int ix0 = userAgentHeader.indexOf("rv:");
+        if (ix0 > -1) {
+          ix0 += 3;
+        }
         int ix1 = userAgentHeader.indexOf(")", ix0);
         if (ix1 > 0) {
           String version = userAgentHeader.substring(ix0, ix1);
