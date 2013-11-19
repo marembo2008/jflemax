@@ -20,10 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 public class JFlemaxListener extends JFlemaxController implements PhaseListener {
 
   private void processCacheControl() {
-    System.out.println("Processing cache controls......");
     String requestPath = getRequestPath();
     if (!PageInformation.isCurrentPageCached(requestPath)) {
-      System.out.println("Current page has no-cache specified...." + requestPath);
       FacesContext facesContext = FacesContext.getCurrentInstance();
       HttpServletResponse response = (HttpServletResponse) facesContext
               .getExternalContext().getResponse();
@@ -37,7 +35,6 @@ public class JFlemaxListener extends JFlemaxController implements PhaseListener 
 
   @Override
   public void afterPhase(PhaseEvent event) {
-    System.err.println("After phase called: " + event.getPhaseId());
     PhaseId phaseId = event.getPhaseId();
     JsfPhaseIdOption jsfPhaseIdOption = JsfPhaseIdOption.AFTER_PHASE;
     validateRequest(phaseId, jsfPhaseIdOption);
@@ -45,7 +42,6 @@ public class JFlemaxListener extends JFlemaxController implements PhaseListener 
 
   @Override
   public void beforePhase(PhaseEvent event) {
-    System.err.println("before phase called");
     PhaseId phaseId = event.getPhaseId();
     if (phaseId.equals(PhaseId.RENDER_RESPONSE)) {
       processCacheControl();

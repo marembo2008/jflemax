@@ -293,7 +293,6 @@ public class JFlemaxController {
     //get parameter for ignore request
     String value = getParameter(IGNORE_VALIDATION);
     if (value != null && Boolean.valueOf(value)) {
-      System.out.println("Ignoring validation: " + value);
       return;
     }
     String requestPath = getRequestPath();
@@ -359,7 +358,6 @@ public class JFlemaxController {
     //get parameter for ignore request
     String value = getParameter(IGNORE_VALIDATION);
     if (value != null && Boolean.valueOf(value)) {
-      System.out.println("Ignoring validation: " + value);
       return;
     }
     String requestPath = getRequestPath();
@@ -368,7 +366,6 @@ public class JFlemaxController {
     if (referingPath != null && referingPath.contains(contextPath)) {
       referingPath = referingPath.substring(referingPath.indexOf(contextPath) + contextPath.length());
     }
-    System.err.println("Request Path: " + requestPath);
     PageInformation pageInformation = getPageInformation();
     if (pageInformation != null) {
       Set<RequestInfo> requestInfos = pageInformation.getRequestInfos(requestPath,
@@ -382,7 +379,6 @@ public class JFlemaxController {
       boolean loginRequest = (getPrinciple() != null);
       Map<RequestInfo, Boolean> infos = new HashMap<RequestInfo, Boolean>();
       Map<RequestInfo, Integer> infos0 = new HashMap<RequestInfo, Integer>();
-      System.out.println("Request Infos: " + infos);
       for (RequestInfo requestInfo : requestInfos) {
         RequestStatus requestStatus = requestInfo.getRequestStatus();
         LoginStatus loginStatus = requestInfo.getLoginStatus();
@@ -619,7 +615,6 @@ public class JFlemaxController {
 
   public static String getCurrentSessionClientIp() {
     String ipAddress = getRemoteAddress();
-    System.out.println("CurrentSessionClientIp:" + ipAddress);
     return ipAddress;
   }
 
@@ -633,7 +628,6 @@ public class JFlemaxController {
     HttpSession session = getCurrentSession();
     ServletContext sc = session.getServletContext();
     String path = sc.getRealPath("/");
-    System.out.println("Application Resource path: " + path);
     if (!Utility.isNullOrEmpty(path)) {
       List<String> resources = new ArrayList<String>();
       getResources(path, new File(path), resources);

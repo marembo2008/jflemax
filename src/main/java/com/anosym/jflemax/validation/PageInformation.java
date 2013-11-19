@@ -197,7 +197,6 @@ public class PageInformation implements Serializable {
           }
           requestInfos.add(info);
         }
-        System.out.println("Request Info: " + info);
       }
     } catch (Exception e) {
       Logger.getLogger(PageInformation.class.getSimpleName()).log(Level.SEVERE, onRequest + "", e);
@@ -425,7 +424,6 @@ public class PageInformation implements Serializable {
         }
       }
     }
-    System.out.println("AnnotatedBeans: " + annotatedBeans);
     for (Class<?> c : annotatedBeans) {
       pageInformation.processController(c);
     }
@@ -460,7 +458,6 @@ public class PageInformation implements Serializable {
     }
     //scan for onrequests and onrequest
     Set<Class<?>> annotatedBeans = reflections.getTypesAnnotatedWith(OnRequests.class);
-    System.out.println("AnnotatedBeans: " + annotatedBeans);
     for (Class<?> c : annotatedBeans) {
       pageInformation.processController(c);
     }
