@@ -4,7 +4,10 @@
  */
 package com.anosym.jflemax.validation.browser;
 
+import com.anosym.utilities.Utility;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  *
@@ -101,5 +104,33 @@ public class UserAgent {
 
   public void setOsVersion(String osVersion) {
     this.osVersion = osVersion;
+  }
+
+  public boolean isIE8OrLower() {
+    return (isWindows() && !Utility.isNullOrEmpty(browserVersion) && Float.parseFloat(browserVersion.trim()) <= 8.0);
+  }
+
+  public boolean isIE11OrHigher() {
+    return (isWindows() && !Utility.isNullOrEmpty(browserVersion) && Float.parseFloat(browserVersion.trim()) >= 11.0);
+  }
+
+  public static String getWindowsVersion(String ntVersion) {
+    return WINDOWS_VERSION_MAPPING.get(ntVersion);
+  }
+  private static final Map<String, String> WINDOWS_VERSION_MAPPING = new HashMap<String, String>();
+
+  static {
+    WINDOWS_VERSION_MAPPING.put("windows nt 6.3", "	windows 8.1");
+    WINDOWS_VERSION_MAPPING.put("windows nt 6.2", "	windows 8");
+    WINDOWS_VERSION_MAPPING.put("windows nt 6.1", "	windows 7");
+    WINDOWS_VERSION_MAPPING.put("windows nt 6.0", "	windows Vista");
+    WINDOWS_VERSION_MAPPING.put("windows nt 5.2", "	windows Server 2003; windows XP x64 Edition");
+    WINDOWS_VERSION_MAPPING.put("windows nt 5.1", "	windows XP");
+    WINDOWS_VERSION_MAPPING.put("windows nt 5.01", "	windows 200, Service Pack 1");
+    WINDOWS_VERSION_MAPPING.put("windows nt 5.0", "	windows 2000");
+    WINDOWS_VERSION_MAPPING.put("windows nt 4.0", "Microsoft windows nt 4.0");
+    WINDOWS_VERSION_MAPPING.put("windows 98", "windows 98");
+    WINDOWS_VERSION_MAPPING.put("windows 95", "windows 95");
+    WINDOWS_VERSION_MAPPING.put("windows ce", "windows CE");
   }
 }

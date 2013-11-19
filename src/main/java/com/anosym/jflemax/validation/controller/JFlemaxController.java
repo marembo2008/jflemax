@@ -25,6 +25,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.el.ELResolver;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -196,7 +198,6 @@ public class JFlemaxController {
    */
   public static String getApplicationUrl() {
     String host = getRequestHeader("host");
-    System.out.println("getApplicationUrl: " + host);
     String context = getContextPath();
     return host + context;
   }
@@ -212,11 +213,52 @@ public class JFlemaxController {
     return getUserAgent(userAgentHeader);
   }
 
-  private static UserAgent getUserAgent(String userAgentHeader) {
+  private static UserAgent tryGetMicrosoftAgent(String uah) {
+    //if we have both mozilla and windows nt string, then we are definitely working with windows and msie.
+    uah = uah.toLowerCase();
+    if (uah.contains("mozilla") && uah.contains("windows nt")) {
+      UserAgent ua = new UserAgent();
+      ua.setOs("Windows");
+      //get windows version
+      String regex = "windows\\s+[^\\d*\\w*]\\d+\\.*\\d*";
+      Pattern p = Pattern.compile(regex);
+      Matcher m = p.matcher(uah);
+      if (m.find()) {
+        int ix = m.start(), ix0 = m.end();
+        //get the sub
+        String windowsVersion = uah.substring(ix, ix0);
+        int ix1 = windowsVersion.indexOf("nt");
+        String version = windowsVersion.substring(ix1).trim();
+        ua.setOsVersion(version);
+      }
+
+      return ua;
+    }
+    return null;
+  }
+
+  protected static UserAgent getUserAgent(String userAgentHeader) {
     if (userAgentHeader != null) {
       UserAgent agent = new UserAgent();
       if (userAgentHeader.contains("MSIE")) {
         agent.setBrowserType("MSIE");
+        //get the ie version
+        int ix0 = userAgentHeader.indexOf("MSIE") + 4;
+        int ix1 = userAgentHeader.indexOf(";", ix0);
+        if (ix1 > 0) {
+          String version = userAgentHeader.substring(ix0, ix1);
+          agent.setBrowserVersion(version);
+        }
+      } else if (userAgentHeader.contains("Mozilla") && userAgentHeader.contains("Windows")) {
+        //we are working with IE
+        agent.setBrowserType("MSIE");
+        //get the ie version
+        int ix0 = userAgentHeader.indexOf("rv:") + 3;
+        int ix1 = userAgentHeader.indexOf(")", ix0);
+        if (ix1 > 0) {
+          String version = userAgentHeader.substring(ix0, ix1);
+          agent.setBrowserVersion(version);
+        }
       } else if (userAgentHeader.contains("Firefox")) {
         agent.setBrowserType("Firefox");
       } else if (userAgentHeader.contains("Chrome") || userAgentHeader.contains("AppleWebKit")) {
