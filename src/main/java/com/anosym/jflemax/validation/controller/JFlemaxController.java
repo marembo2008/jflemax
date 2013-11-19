@@ -115,6 +115,7 @@ public class JFlemaxController {
       }
       FacesContext context = FacesContext.getCurrentInstance();
       context.getExternalContext().redirect(to);
+      context.responseComplete();
     } catch (IOException ex) {
       java.util.logging.Logger.getLogger(JFlemaxController.class.getName()).log(Level.SEVERE, null, ex);
     }
@@ -231,7 +232,6 @@ public class JFlemaxController {
         String version = windowsVersion.substring(ix1).trim();
         ua.setOsVersion(version);
       }
-
       return ua;
     }
     return null;
@@ -408,6 +408,7 @@ public class JFlemaxController {
                             || (!state && requestInfo.getRedirectStatus() == RedirectStatus.ON_FAILURE)
                             || requestInfo.getRedirectStatus() == RedirectStatus.ALWAYS;
                     if (doRedirect && requestInfo.isRedirect()) {
+                      System.out.println("Redirect: OnRequestMethod=" + validatingMethod.getName());
                       infos.put(requestInfo, state);
                     }
                   } else if (res instanceof Integer) {
