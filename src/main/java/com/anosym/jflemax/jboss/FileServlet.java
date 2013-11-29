@@ -61,6 +61,7 @@ public class FileServlet extends HttpServlet {
    *
    * @see HttpServlet#init().
    */
+  @Override
   public void init() throws ServletException {
 
     // Get base path (path to get all resources from) as init parameter.
@@ -90,6 +91,7 @@ public class FileServlet extends HttpServlet {
    *
    * @see HttpServlet#doHead(HttpServletRequest, HttpServletResponse).
    */
+  @Override
   protected void doHead(HttpServletRequest request, HttpServletResponse response)
           throws ServletException, IOException {
     // Process request without content.
@@ -101,6 +103,7 @@ public class FileServlet extends HttpServlet {
    *
    * @see HttpServlet#doGet(HttpServletRequest, HttpServletResponse).
    */
+  @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
           throws ServletException, IOException {
     // Process request with content.
