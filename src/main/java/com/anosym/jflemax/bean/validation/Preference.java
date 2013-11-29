@@ -24,7 +24,7 @@ public @interface Preference {
 
   String message() default "This field is required for SA customers";
 
-  Class<?>[] group() default {};
+  Class<?>[] groups() default {};
 
   Class<? extends Payload>[] payload() default {};
 
