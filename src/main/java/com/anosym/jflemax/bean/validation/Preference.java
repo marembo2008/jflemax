@@ -22,13 +22,11 @@ import javax.validation.Payload;
 @Constraint(validatedBy = PreferenceConstraintValidator.class)
 public @interface Preference {
 
-  String message() default "This field is required for SA customers";
+  String message() default "Value is invalid";
 
   Class<?>[] groups() default {};
 
   Class<? extends Payload>[] payload() default {};
 
-  String[] validate();
-
-  Class<? extends PreferenceValidator> validator();
+  Class<? extends PreferenceHandler> handler();
 }

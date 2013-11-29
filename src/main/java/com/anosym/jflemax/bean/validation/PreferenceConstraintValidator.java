@@ -15,18 +15,16 @@ import javax.validation.ConstraintValidatorContext;
  */
 public class PreferenceConstraintValidator implements ConstraintValidator<Preference, Object> {
 
-  private String[] fieldsToValidate;
-  private Class<? extends PreferenceValidator> validator;
+  private Class<? extends PreferenceHandler> validator;
 
   public void initialize(Preference constraintAnnotation) {
-    fieldsToValidate = constraintAnnotation.validate();
-    validator = constraintAnnotation.validator();
+    validator = constraintAnnotation.handler();
   }
 
   public boolean isValid(Object value, ConstraintValidatorContext context) {
     try {
-      PreferenceValidator pv = validator.newInstance();
-      return pv.isValid(value, fieldsToValidate);
+      PreferenceHandler pv = validator.newInstance();
+      return pv.isValid(value);
     } catch (InstantiationException ex) {
       Logger.getLogger(PreferenceConstraintValidator.class.getName()).log(Level.SEVERE, null, ex);
     } catch (IllegalAccessException ex) {
