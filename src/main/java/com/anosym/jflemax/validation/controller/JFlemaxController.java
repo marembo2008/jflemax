@@ -303,7 +303,7 @@ public class JFlemaxController {
     FacesContext
             .getCurrentInstance()
             .getExternalContext()
-            .addResponseHeader(name, value);
+            .addResponseCookie(name, value, null);
   }
 
   /**
