@@ -291,6 +291,21 @@ public class JFlemaxController {
     return (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(true);
   }
 
+  public static String getCookie(String name) {
+    Map<String, Object> m = FacesContext
+            .getCurrentInstance()
+            .getExternalContext()
+            .getRequestCookieMap();
+    return (String) (m.containsKey(name) ? m.get(name) : null);
+  }
+
+  public static void addCookie(String name, String value) {
+    FacesContext
+            .getCurrentInstance()
+            .getExternalContext()
+            .addResponseHeader(name, value);
+  }
+
   /**
    * Call this method at prerender view
    */
