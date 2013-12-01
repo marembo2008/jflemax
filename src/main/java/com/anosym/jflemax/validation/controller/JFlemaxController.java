@@ -32,6 +32,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseId;
 import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -296,7 +297,16 @@ public class JFlemaxController {
             .getCurrentInstance()
             .getExternalContext()
             .getRequestCookieMap();
-    return (String) (m.containsKey(name) ? m.get(name) : null);
+    Object cookie = m.get(name);
+    if (cookie != null) {
+      if (cookie instanceof Cookie) {
+        Cookie ck = (Cookie) cookie;
+        return ck.getValue();
+      } else {
+        return cookie.toString();
+      }
+    }
+    return null;
   }
 
   public static void addCookie(String name, String value) {
