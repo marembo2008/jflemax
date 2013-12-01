@@ -319,6 +319,13 @@ public class JFlemaxController {
             .addResponseCookie(name, value, props);
   }
 
+  public static void addCookie(String name, String value, Map<String, Object> cookieParams) {
+    FacesContext
+            .getCurrentInstance()
+            .getExternalContext()
+            .addResponseCookie(name, value, cookieParams);
+  }
+
   /**
    * Call this method at prerender view
    */
