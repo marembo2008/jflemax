@@ -300,10 +300,13 @@ public class JFlemaxController {
   }
 
   public static void addCookie(String name, String value) {
+    Map<String, Object> props = new HashMap<String, Object>();
+    props.put("maxAge", Integer.MAX_VALUE);
+    props.put("secure", true);
     FacesContext
             .getCurrentInstance()
             .getExternalContext()
-            .addResponseCookie(name, value, null);
+            .addResponseCookie(name, value, props);
   }
 
   /**
