@@ -69,6 +69,16 @@ public class JFlemaxSessionController implements HttpSessionListener {
     return (T) SESSION_USERS.get(sessionId);
   }
 
+  /**
+   * Returns true if the current session has logged in user.
+   *
+   * @param sessionId
+   * @return
+   */
+  public static boolean isLoggedInProfileSession(String sessionId) {
+    return getSessionUser(sessionId) != null;
+  }
+
   public static Collection<JCurrentSession> getCurrentActiveSessionInformation() {
     return CURRENT_ACTIVE_SESSIONS.values();
   }

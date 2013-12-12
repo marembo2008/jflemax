@@ -204,6 +204,37 @@ public class JFlemaxController {
     return host + context;
   }
 
+  /**
+   * Returns the applications full url, including the context path attached and request scheme.
+   *
+   * @return
+   */
+  public static String getSchematicApplicationUrl() {
+    String scheme = getScheme();
+    String host = getRequestHeader("host");
+    String context = getContextPath();
+    return scheme + "://" + host + context;
+  }
+
+  /**
+   * Returns true if the current scheme is https.
+   *
+   * @return
+   */
+  public static boolean isSecure() {
+    String scheme = FacesContext.getCurrentInstance().getExternalContext().getRequestScheme();
+    return scheme != null && scheme.trim().equalsIgnoreCase("https");
+  }
+
+  /**
+   * Get the current scheme for used by the current request.F
+   *
+   * @return
+   */
+  public static String getScheme() {
+    return FacesContext.getCurrentInstance().getExternalContext().getRequestScheme();
+  }
+
   public static UserAgent getCurrentUserAgent() {
     String userAgentHeader = getRequestHeader("User-Agent");
     if (userAgentHeader == null) {
@@ -637,9 +668,9 @@ public class JFlemaxController {
 
   /**
    * From OmniFaces Library. Returns the Internet Protocol (IP) address of the client that sent the
-   * request. This will first check the
-   * <code>X-Forwarded-For</code> request header and if it's present, then return its first IP
-   * address, else just return {@link HttpServletRequest#getRemoteAddress()} unmodified.
+   * request. This will first check the <code>X-Forwarded-For</code> request header and if it's
+   * present, then return its first IP address, else just return
+   * {@link HttpServletRequest#getRemoteAddress()} unmodified.
    *
    * @return The IP address of the client.
    * @see HttpServletRequest#getRemoteAddress()
