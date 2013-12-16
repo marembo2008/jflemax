@@ -42,7 +42,7 @@ import javax.servlet.http.HttpSession;
  */
 public class JFlemaxController {
 
-  private static final String IGNORE_VALIDATION = "ignore_validate";
+  public static final String IGNORE_VALIDATION = "ignore_validate";
   public static final String APPLICATION_PACKAGE = "application_package";
 
   public static String getIGNORE_VALIDATION() {

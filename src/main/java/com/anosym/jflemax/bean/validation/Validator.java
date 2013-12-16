@@ -7,8 +7,9 @@ package com.anosym.jflemax.bean.validation;
 /**
  *
  * @author marembo
+ * @param <T>
  */
-public interface PreferenceHandler<T> {
+public interface Validator<T> {
 
   boolean isValid(T value);
 }

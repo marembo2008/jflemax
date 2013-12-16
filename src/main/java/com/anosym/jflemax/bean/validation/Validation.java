@@ -20,7 +20,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Constraint(validatedBy = PreferenceConstraintValidator.class)
-public @interface Preference {
+public @interface Validation {
 
   String message() default "Value is invalid";
 
@@ -28,5 +28,5 @@ public @interface Preference {
 
   Class<? extends Payload>[] payload() default {};
 
-  Class<? extends PreferenceHandler> handler();
+  Class<? extends Validator> validator();
 }

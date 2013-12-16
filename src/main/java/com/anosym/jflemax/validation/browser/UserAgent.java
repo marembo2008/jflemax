@@ -5,6 +5,7 @@
 package com.anosym.jflemax.validation.browser;
 
 import com.anosym.utilities.Utility;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -13,8 +14,9 @@ import java.util.Map;
  *
  * @author marembo
  */
-public class UserAgent {
+public class UserAgent implements Serializable {
 
+  private static final long serialVersionUID = 9373625762831L;
   private static final String GOOGLE_CHROME = "AppleWebKit";
   private static final String MOZILLA_FIREFOX = "Firefox";
   private static final String INTERNET_EXPLORER = "MSIE";
