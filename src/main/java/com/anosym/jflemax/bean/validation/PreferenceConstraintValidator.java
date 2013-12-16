@@ -13,17 +13,17 @@ import javax.validation.ConstraintValidatorContext;
  *
  * @author marembo
  */
-public class PreferenceConstraintValidator implements ConstraintValidator<Validation, Object> {
+public class PreferenceConstraintValidator implements ConstraintValidator<Preference, Object> {
 
-  private Class<? extends Validator> validator;
+  private Class<? extends PreferenceHandler> validator;
 
-  public void initialize(Validation constraintAnnotation) {
-    validator = constraintAnnotation.validator();
+  public void initialize(Preference constraintAnnotation) {
+    validator = constraintAnnotation.handler();
   }
 
   public boolean isValid(Object value, ConstraintValidatorContext context) {
     try {
-      Validator pv = validator.newInstance();
+      PreferenceHandler pv = validator.newInstance();
       return pv.isValid(value);
     } catch (InstantiationException ex) {
       Logger.getLogger(PreferenceConstraintValidator.class.getName()).log(Level.SEVERE, null, ex);
