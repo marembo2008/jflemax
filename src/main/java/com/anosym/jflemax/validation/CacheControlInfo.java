@@ -7,7 +7,6 @@ package com.anosym.jflemax.validation;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +17,7 @@ import java.util.regex.Pattern;
 public class CacheControlInfo implements Serializable {
 
   private final List<String> urls;
-  private boolean cached;
+  private final boolean cached;
 
   public CacheControlInfo(List<String> urls, boolean cached) {
     this.urls = urls;

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library.
  * If not, see <http://www.gnu.org/licenses/>.
  */
-package com.anosym.jflemax.jboss;
+package com.anosym.jflemax.servlet;
 
 import java.io.Closeable;
 import java.io.File;
@@ -42,12 +42,13 @@ import javax.servlet.http.HttpServletResponse;
  * @author BalusC
  * @link http://balusc.blogspot.com/2009/02/fileservlet-supporting-resume-and.html
  */
-@WebServlet(urlPatterns = {"/static/*"})
+@WebServlet(urlPatterns = {FileServlet.SERVLET_URL_PATTERN})
 public class FileServlet extends HttpServlet {
 //static path configuration for uploading the static content from
 
-  public static String STATIC_PATH = "com.anosym.static.path";
-  public static String FILE_SERVLET_URL = "static";
+  public static final String BASE_PATH = "com.anosym.static.path";
+  public static final String SERVLET_URL = "static";
+  public static final String SERVLET_URL_PATTERN = "/" + SERVLET_URL + "/*";
   // Constants ----------------------------------------------------------------------------------
   private static final int DEFAULT_BUFFER_SIZE = 10240; // ..bytes = 10KB.
   private static final long DEFAULT_EXPIRE_TIME = 604800000L; // ..ms = 1 week.
@@ -59,13 +60,14 @@ public class FileServlet extends HttpServlet {
   /**
    * Initialize the servlet.
    *
+   * @throws javax.servlet.ServletException
    * @see HttpServlet#init().
    */
   @Override
   public void init() throws ServletException {
 
     // Get base path (path to get all resources from) as init parameter.
-    this.basePath = System.getProperty(STATIC_PATH);
+    this.basePath = System.getProperty(BASE_PATH);
     System.out.println("FileServlet BasePath: " + basePath);
 
     // Validate base path.
@@ -89,6 +91,10 @@ public class FileServlet extends HttpServlet {
   /**
    * Process HEAD request. This returns the same headers as GET request, but without content.
    *
+   * @param request
+   * @param response
+   * @throws javax.servlet.ServletException
+   * @throws java.io.IOException
    * @see HttpServlet#doHead(HttpServletRequest, HttpServletResponse).
    */
   @Override
@@ -101,6 +107,10 @@ public class FileServlet extends HttpServlet {
   /**
    * Process GET request.
    *
+   * @param request
+   * @param response
+   * @throws javax.servlet.ServletException
+   * @throws java.io.IOException
    * @see HttpServlet#doGet(HttpServletRequest, HttpServletResponse).
    */
   @Override
@@ -150,9 +160,7 @@ public class FileServlet extends HttpServlet {
     long lastModified = file.lastModified();
     String eTag = fileName + "_" + length + "_" + lastModified;
 
-
     // Validate request headers for caching ---------------------------------------------------
-
     // If-None-Match header should contain "*" or ETag. If so, then return 304.
     String ifNoneMatch = request.getHeader("If-None-Match");
     if (ifNoneMatch != null && matches(ifNoneMatch, eTag)) {
@@ -170,9 +178,7 @@ public class FileServlet extends HttpServlet {
       return;
     }
 
-
     // Validate request headers for resume ----------------------------------------------------
-
     // If-Match header should contain "*" or ETag. If not, then return 412.
     String ifMatch = request.getHeader("If-Match");
     if (ifMatch != null && !matches(ifMatch, eTag)) {
@@ -187,9 +193,7 @@ public class FileServlet extends HttpServlet {
       return;
     }
 
-
     // Validate and process range -------------------------------------------------------------
-
     // Prepare some variables. The full Range represents the complete file.
     Range full = new Range(0, length - 1, length);
     List<Range> ranges = new ArrayList<Range>();
@@ -247,9 +251,7 @@ public class FileServlet extends HttpServlet {
       }
     }
 
-
     // Prepare and initialize response --------------------------------------------------------
-
     // Get content type by file name and set default GZIP support and content disposition.
     String contentType = getServletContext().getMimeType(fileName);
     boolean acceptsGzip = false;
@@ -284,9 +286,7 @@ public class FileServlet extends HttpServlet {
     response.setDateHeader("Last-Modified", lastModified);
     response.setDateHeader("Expires", System.currentTimeMillis() + DEFAULT_EXPIRE_TIME);
 
-
     // Send requested file (part(s)) to client ------------------------------------------------
-
     // Prepare streams.
     RandomAccessFile input = null;
     OutputStream output = null;
