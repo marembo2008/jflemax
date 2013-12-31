@@ -24,14 +24,29 @@ public class SequenceConstraintValidator implements ConstraintValidator<Sequence
     this.sequence = constraintAnnotation;
   }
 
+  private Field getField(Class c, String field) {
+    try {
+      return c.getDeclaredField(field);
+    } catch (NoSuchFieldException e) {
+      if (c == Object.class) {
+        return null;
+      } else {
+        return getField(c.getSuperclass(), field);
+      }
+    }
+  }
+
   @SuppressWarnings({"UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch"})
   public boolean isValid(Object value, ConstraintValidatorContext context) {
     //get the fields and then set them.
     for (SequenceOption so : sequence.fields()) {
       try {
         String fName = so.field();
-        Field f = value.getClass().getDeclaredField(fName);
+        Field f = getField(value.getClass(), fName);
         f.setAccessible(true);
+        if (f.get(value) != null) {
+          return true;
+        }
         switch (so.type()) {
           case GENERATOR:
             throw new UnsupportedOperationException("Not supported yet");
