@@ -24,6 +24,7 @@ public class PrincipalInfo extends BasicInfo {
     this.principalMethod = principalMethod;
   }
 
+  @SuppressWarnings({"UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch"})
   public <T> T getUserPrinciple() {
     try {
       if (principalMethod != null) {

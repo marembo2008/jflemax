@@ -572,6 +572,7 @@ public class JFlemaxController {
   public static <T> T findManagedBean(Class<T> beanClass) {
     try {
       String name = beanClass.getSimpleName();
+      name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
       Object o = findManagedBean(name);
       return beanClass.cast(o);
     } catch (Exception e) {
@@ -583,7 +584,6 @@ public class JFlemaxController {
   public static Object findManagedBean(String name) {
     try {
       FacesContext facesContext = FacesContext.getCurrentInstance();
-      name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
       Object o = facesContext.getApplication().getELResolver().
               getValue(facesContext.getELContext(), null, name);
       return o;

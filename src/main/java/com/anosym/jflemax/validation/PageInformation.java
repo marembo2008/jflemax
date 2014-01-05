@@ -225,7 +225,8 @@ public class PageInformation implements Serializable {
         final Pattern p = Pattern.compile("[^/]/");
         final Matcher m = p.matcher(page);
         while (m.find()) {
-          String mainPage = (page.substring(0, m.end()));
+          //we end the main page with an asterisk cause thats the way it refers to all pages within it.
+          String mainPage = (page.substring(0, m.end())) + "*";
           //check if this page belongs to any of the parent which may have been specified.
           Set<RequestInfo> _uInfo = onRequestInfos.get(mainPage);
           if (_uInfo != null) {
