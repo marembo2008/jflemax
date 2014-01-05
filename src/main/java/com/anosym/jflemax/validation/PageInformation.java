@@ -16,6 +16,7 @@ import com.anosym.jflemax.validation.annotation.OnRequests;
 import com.anosym.jflemax.validation.annotation.Principal;
 import com.anosym.jflemax.validation.controller.JFlemaxController;
 import com.anosym.utilities.IdGenerator;
+import com.anosym.utilities.Utility;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.faces.event.PhaseId;
+import javax.inject.Named;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -164,9 +166,14 @@ public class PageInformation implements Serializable {
     try {
       if (onRequest != null) {
         String controller = onRequest.controller();
-        if (controller == null || controller.trim().isEmpty()) {
-          controller = cls.getSimpleName();
-          if (!controller.isEmpty()) {
+        if (Utility.isNullOrEmpty(controller)) {
+          Named named = cls.getAnnotation(Named.class);
+          if (named == null) {
+            return;
+          }
+          controller = named.value();
+          if (Utility.isNullOrEmpty(controller)) {
+            controller = cls.getSimpleName();
             controller = Character.toLowerCase(controller.charAt(0)) + ((controller.length() > 1)
                     ? controller.substring(1) : "");
           }
@@ -372,8 +379,8 @@ public class PageInformation implements Serializable {
     if (annotatedBeans != null) {
       String pages[] = {};
       for (Class<?> c : annotatedBeans) {
-        com.anosym.jflemax.validation.annotation.ViewExpiredPages viewExpiredPages =
-                c.getAnnotation(com.anosym.jflemax.validation.annotation.ViewExpiredPages.class);
+        com.anosym.jflemax.validation.annotation.ViewExpiredPages viewExpiredPages
+                = c.getAnnotation(com.anosym.jflemax.validation.annotation.ViewExpiredPages.class);
         CacheControl cc = c.getAnnotation(CacheControl.class);
         if (viewExpiredPages != null) {
           pages = Arrays.copyOf(pages, pages.length + viewExpiredPages.pages().length);
@@ -400,12 +407,12 @@ public class PageInformation implements Serializable {
     pageInformation = new PageInformation();
     org.reflections.Reflections reflections = new Reflections(new ConfigurationBuilder()
             .filterInputsBy(new FilterBuilder()
-            .include(FilterBuilder.prefix(System.getProperty(JFlemaxController.APPLICATION_PACKAGE, "com")))
-            .include(FilterBuilder.prefix("com.flemax")))
+                    .include(FilterBuilder.prefix(System.getProperty(JFlemaxController.APPLICATION_PACKAGE, "com")))
+                    .include(FilterBuilder.prefix("com.flemax")))
             .setUrls(ClasspathHelper.forPackage("com"))
             .setScanners(new SubTypesScanner(),
-            new TypeAnnotationsScanner(),
-            new ResourcesScanner()));
+                    new TypeAnnotationsScanner(),
+                    new ResourcesScanner()));
     //process cached controlls.
     processCacheControlInfo(reflections, pageInformation);
     processViewExpiredPages(reflections, pageInformation);
@@ -438,12 +445,12 @@ public class PageInformation implements Serializable {
     pageInformation.setContextName(contextName);
     org.reflections.Reflections reflections = new Reflections(new ConfigurationBuilder()
             .filterInputsBy(new FilterBuilder()
-            .include(FilterBuilder.prefix(applicationPackage))
-            .include(FilterBuilder.prefix("com.flemax")))
+                    .include(FilterBuilder.prefix(applicationPackage))
+                    .include(FilterBuilder.prefix("com.flemax")))
             .setUrls(ClasspathHelper.forPackage("com"))
             .setScanners(new SubTypesScanner(),
-            new TypeAnnotationsScanner(),
-            new ResourcesScanner()));
+                    new TypeAnnotationsScanner(),
+                    new ResourcesScanner()));
     //scan for current principal
     Set<Method> m = reflections.getMethodsAnnotatedWith(Principal.class);
     if (m != null && !m.isEmpty()) {
