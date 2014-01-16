@@ -47,8 +47,8 @@ public class FileServlet extends HttpServlet {
 //static path configuration for uploading the static content from
 
   public static final String BASE_PATH = "com.anosym.static.path";
-  public static final String SERVLET_URL = "static";
-  public static final String SERVLET_URL_PATTERN = "/" + SERVLET_URL + "/*";
+  public static final String SERVLET_URL = "/static";
+  public static final String SERVLET_URL_PATTERN = SERVLET_URL + "/*";
   // Constants ----------------------------------------------------------------------------------
   private static final int DEFAULT_BUFFER_SIZE = 10240; // ..bytes = 10KB.
   private static final long DEFAULT_EXPIRE_TIME = 604800000L; // ..ms = 1 week.
@@ -56,6 +56,9 @@ public class FileServlet extends HttpServlet {
   // Properties ---------------------------------------------------------------------------------
   private String basePath;
 
+  public static String getBasePath() {
+    return System.getProperty(BASE_PATH);
+  }
   // Actions ------------------------------------------------------------------------------------
   /**
    * Initialize the servlet.
@@ -67,7 +70,7 @@ public class FileServlet extends HttpServlet {
   public void init() throws ServletException {
 
     // Get base path (path to get all resources from) as init parameter.
-    this.basePath = System.getProperty(BASE_PATH);
+    this.basePath = getBasePath();
     System.out.println("FileServlet BasePath: " + basePath);
 
     // Validate base path.
@@ -144,7 +147,7 @@ public class FileServlet extends HttpServlet {
     }
 
     // URL-decode the file name (might contain spaces and on) and prepare file object.
-    File file = new File(basePath, File.separator + "static" + File.separator + URLDecoder.decode(requestedFile, "UTF-8"));
+    File file = new File(basePath, SERVLET_URL + File.separator + URLDecoder.decode(requestedFile, "UTF-8"));
     System.out.println("Loading resource from FileServlet: " + file.getAbsolutePath());
     // Check if file actually exists in filesystem.
     if (!file.exists()) {

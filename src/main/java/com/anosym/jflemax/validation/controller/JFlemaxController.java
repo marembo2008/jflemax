@@ -647,19 +647,25 @@ public class JFlemaxController {
   }
 
   public static void logError(Throwable error) {
-    Logger.getLogger(JFlemaxController.class.getName()).log(Level.SEVERE, null, error);
+    StackTraceElement ste = error.getStackTrace()[1];
+    Logger.getLogger(ste.getClassName()).log(Level.SEVERE, null, error);
   }
 
   public static void logError(Throwable error, String message) {
-    Logger.getLogger(JFlemaxController.class.getName()).log(Level.SEVERE, message, error);
+    StackTraceElement ste = error.getStackTrace()[1];
+    Logger.getLogger(ste.getClassName()).log(Level.SEVERE, message, error);
   }
 
   public static void logMessage(String message) {
-    Logger.getLogger(JFlemaxController.class.getName()).log(Level.INFO, message);
+    StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+    StackTraceElement ste = elements[elements.length - 1];
+    Logger.getLogger(ste.getClassName()).log(Level.INFO, message);
   }
 
   public static void logMessage(String title, String message) {
-    Logger.getLogger(JFlemaxController.class.getName()).log(Level.INFO, title + "{0}", message);
+    StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+    StackTraceElement ste = elements[elements.length - 1];
+    Logger.getLogger(ste.getClassName()).log(Level.INFO, title + "{0}", message);
   }
 
   public static HttpServletRequest getRequest(FacesContext context) {
