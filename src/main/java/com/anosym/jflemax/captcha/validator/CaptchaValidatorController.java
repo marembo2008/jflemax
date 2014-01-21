@@ -7,6 +7,7 @@ package com.anosym.jflemax.captcha.validator;
 
 import com.anosym.jflemax.validation.controller.JFlemaxController;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Alternative;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -20,6 +21,7 @@ import nl.captcha.Captcha;
  */
 @RequestScoped
 @Named("captchaValidatorController")
+@Alternative
 public class CaptchaValidatorController {
 
   private String captchaAnswer;
