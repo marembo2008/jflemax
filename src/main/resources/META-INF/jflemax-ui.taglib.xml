@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+
+
+<facelet-taglib id="o"
+                xmlns="http://java.sun.com/xml/ns/javaee"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facelettaglibrary_2_0.xsd"
+                version="2.0">
+  <namespace>http://jflemax.anosym.com/ui</namespace>
+  <tag>
+    <tag-name>selectMenu</tag-name>
+    <component>
+      <component-type>com.anosym.jflemax.jsf.component.JRadioSelectMenu</component-type>
+    </component>
+    <attribute>
+      <description>
+				<![CDATA[
+					The mode for this jradioselectemenu, it can be single or multiple.
+				]]>
+      </description>
+      <name>mode</name>
+      <required>true</required>
+      <type>java.lang.String</type>
+    </attribute>
+    <attribute>
+      <description>
+				<![CDATA[
+					A paragraph description for the choice of this values.
+				]]>
+      </description>
+      <name>description</name>
+      <required>false</required>
+      <type>java.lang.String</type>
+    </attribute>
+    <attribute>
+      <description>
+				<![CDATA[
+					The label for these values.
+				]]>
+      </description>
+      <name>label</name>
+      <required>false</required>
+      <type>java.lang.String</type>
+    </attribute>
+  </tag>
+</facelet-taglib>
