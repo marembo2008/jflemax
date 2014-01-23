@@ -17,6 +17,8 @@ import java.lang.annotation.Target;
  *
  * The method must not have parameter argument.
  *
+ * The return type can be any object.
+ *
  * @author marembo
  */
 @Documented
