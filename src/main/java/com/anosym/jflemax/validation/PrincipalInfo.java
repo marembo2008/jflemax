@@ -31,7 +31,7 @@ public class PrincipalInfo extends BasicInfo {
         return (T) principalMethod.invoke(getController(), new Object[]{});
       }
     } catch (Exception ex) {
-      Logger.getLogger(PrincipalInfo.class.getName()).log(Level.SEVERE, null, ex);
+      Logger.getLogger(PrincipalInfo.class.getName()).log(Level.FINE, null, ex);
     }
     return null;
   }

@@ -124,29 +124,25 @@ public class PageInformation implements Serializable {
   }
 
   public void processController(Class<?> cls) {
-    try {
-      addRequest(cls);
-      //scan for Principal info
-      Method[] ms = cls.getMethods();
-      if (pageInformation.principalInfo == null) {
-        for (Method method : ms) {
-          if (method.getAnnotation(Principal.class) != null) {
-            pageInformation.principalInfo = new PrincipalInfo(cls, method);
-            break;
-          }
+    addRequest(cls);
+    //scan for Principal info
+    Method[] ms = cls.getMethods();
+    if (pageInformation.principalInfo == null) {
+      for (Method method : ms) {
+        if (method.isAnnotationPresent(Principal.class)) {
+          pageInformation.principalInfo = new PrincipalInfo(cls, method);
+          break;
         }
       }
-      //scan for index path
-      if (pageInformation.indexPathInfo == null) {
-        for (Method method : ms) {
-          if (method.getAnnotation(IndexPath.class) != null) {
-            pageInformation.indexPathInfo = new IndexPathInfo(cls, method);
-            break;
-          }
+    }
+    //scan for index path
+    if (pageInformation.indexPathInfo == null) {
+      for (Method method : ms) {
+        if (method.isAnnotationPresent(IndexPath.class)) {
+          pageInformation.indexPathInfo = new IndexPathInfo(cls, method);
+          break;
         }
       }
-    } catch (Exception e) {
-      Logger.getLogger(PageInformation.class.getSimpleName()).log(Level.SEVERE, cls.getName() + "", e);
     }
   }
 
@@ -163,50 +159,45 @@ public class PageInformation implements Serializable {
   }
 
   private void addRequest(OnRequest onRequest, Class<?> cls) {
-    try {
-      if (onRequest != null) {
-        String controller = onRequest.controller();
-        if (Utility.isNullOrEmpty(controller)) {
-          Named named = cls.getAnnotation(Named.class);
-          if (named == null) {
-            return;
-          }
-          controller = named.value();
-          if (Utility.isNullOrEmpty(controller)) {
-            controller = cls.getSimpleName();
-            controller = Character.toLowerCase(controller.charAt(0)) + ((controller.length() > 1)
-                    ? controller.substring(1) : "");
-          }
-        }
-        String[] toPages = onRequest.toPages();
-        JsfPhase[] phases = onRequest.jsfPhases();
-        JsfPhaseInfo[] phaseInfos;
-        if (phases.length == 0) {
-          phaseInfos = new JsfPhaseInfo[]{new JsfPhaseInfo(JsfPhaseId.RENDER_RESPONSE, JsfPhaseIdOption.BEFORE_PHASE)};
-        } else {
-          phaseInfos = new JsfPhaseInfo[phases.length];
-          for (int i = 0; i < phases.length; i++) {
-            JsfPhase phase = phases[i];
-            phaseInfos[i] = new JsfPhaseInfo(phase.phaseId(), phase.phaseIdOption());
-          }
-        }
-        RequestInfo info = new RequestInfo(controller, new HashSet<String>(Arrays.asList(toPages)),
-                onRequest.onRequestMethod(), onRequest.redirectPage(), onRequest.redirect(),
-                onRequest.requestStatus(), onRequest.logInStatus(), onRequest.excludedPages(),
-                onRequest.redirectStatus(), phaseInfos, onRequest.execute(), onRequest.redirectFailurePage(),
-                onRequest.redirectOnResult(), onRequest.redirectPages());
-        info.setPriority(onRequest.priority());
-        for (String toPage : toPages) {
-          Set<RequestInfo> requestInfos = onRequestInfos.get(toPage);
-          if (requestInfos == null) {
-            requestInfos = new HashSet<RequestInfo>();
-            onRequestInfos.put(toPage, requestInfos);
-          }
-          requestInfos.add(info);
-        }
+    String controller = onRequest.controller();
+    if (Utility.isNullOrEmpty(controller)) {
+      Named named = cls.getAnnotation(Named.class);
+      if (named == null) {
+        //we do not expect @Named to be null at this point;
+        throw new IllegalArgumentException("Controller not Annotated with @Named: " + cls.getName());
       }
-    } catch (Exception e) {
-      Logger.getLogger(PageInformation.class.getSimpleName()).log(Level.SEVERE, onRequest + "", e);
+      controller = named.value();
+      if (Utility.isNullOrEmpty(controller)) {
+        controller = cls.getSimpleName();
+        controller = Character.toLowerCase(controller.charAt(0)) + ((controller.length() > 1)
+                ? controller.substring(1) : "");
+      }
+    }
+    String[] toPages = onRequest.toPages();
+    JsfPhase[] phases = onRequest.jsfPhases();
+    JsfPhaseInfo[] phaseInfos;
+    if (phases.length == 0) {
+      phaseInfos = new JsfPhaseInfo[]{new JsfPhaseInfo(JsfPhaseId.RENDER_RESPONSE, JsfPhaseIdOption.BEFORE_PHASE)};
+    } else {
+      phaseInfos = new JsfPhaseInfo[phases.length];
+      for (int i = 0; i < phases.length; i++) {
+        JsfPhase phase = phases[i];
+        phaseInfos[i] = new JsfPhaseInfo(phase.phaseId(), phase.phaseIdOption());
+      }
+    }
+    RequestInfo info = new RequestInfo(controller, new HashSet<String>(Arrays.asList(toPages)),
+            onRequest.onRequestMethod(), onRequest.redirectPage(), onRequest.redirect(),
+            onRequest.requestStatus(), onRequest.logInStatus(), onRequest.excludedPages(),
+            onRequest.redirectStatus(), phaseInfos, onRequest.execute(), onRequest.redirectFailurePage(),
+            onRequest.redirectOnResult(), onRequest.redirectPages());
+    info.setPriority(onRequest.priority());
+    for (String toPage : toPages) {
+      Set<RequestInfo> requestInfos = onRequestInfos.get(toPage);
+      if (requestInfos == null) {
+        requestInfos = new HashSet<RequestInfo>();
+        onRequestInfos.put(toPage, requestInfos);
+      }
+      requestInfos.add(info);
     }
   }
 
@@ -433,7 +424,10 @@ public class PageInformation implements Serializable {
       }
     }
     for (Class<?> c : annotatedBeans) {
-      pageInformation.processController(c);
+      //process only if @Named
+      if (c.isAnnotationPresent(Named.class)) {
+        pageInformation.processController(c);
+      }
     }
     annotatedBeans = reflections.getTypesAnnotatedWith(OnRequest.class);
     for (Class<?> c : annotatedBeans) {

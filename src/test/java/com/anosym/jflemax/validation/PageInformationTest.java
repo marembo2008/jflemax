@@ -8,6 +8,8 @@ package com.anosym.jflemax.validation;
 import com.anosym.jflemax.validation.annotation.JsfPhaseIdOption;
 import com.anosym.jflemax.validation.annotation.LoginStatus;
 import com.anosym.jflemax.validation.annotation.OnRequest;
+import com.anosym.jflemax.validation.annotation.Principal;
+import java.lang.reflect.Method;
 import java.util.Set;
 import javax.faces.event.PhaseId;
 import javax.inject.Named;
@@ -40,6 +42,18 @@ public class PageInformationTest {
 
   }
 
+  public static class PrincipleTest {
+
+    @Principal
+    public Object getPrinciple() {
+      return "aha-principle";
+    }
+  }
+
+  public static class PrincipleTestImpl extends PrincipleTest {
+
+  }
+
   public PageInformationTest() {
   }
 
@@ -63,4 +77,18 @@ public class PageInformationTest {
     Assert.assertEquals(expected, i.getController());
   }
 
+  @Test
+  public void testSubclassPrincipleInherited() {
+    Class cl = PrincipleTestImpl.class;
+    Method[] ms = cl.getMethods();
+    boolean present = false;
+    for (Method m : ms) {
+      if (m.isAnnotationPresent(Principal.class)) {
+        present = true;
+        System.out.println(m);
+        break;
+      }
+    }
+    Assert.assertTrue(present);
+  }
 }

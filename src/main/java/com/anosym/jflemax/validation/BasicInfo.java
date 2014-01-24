@@ -20,8 +20,7 @@ public abstract class BasicInfo {
   private boolean applicationScoped;
 
   public BasicInfo(Class<?> controllerClass) {
-    this.controllerClass = controllerClass;
-    applicationScoped = controllerClass.getAnnotation(ApplicationScoped.class) != null;
+    setControllerClass(controllerClass);
   }
 
   public BasicInfo() {
@@ -31,9 +30,9 @@ public abstract class BasicInfo {
     return controllerClass;
   }
 
-  public void setControllerClass(Class<?> controllerClass) {
+  public final void setControllerClass(Class<?> controllerClass) {
     this.controllerClass = controllerClass;
-    this.applicationScoped = controllerClass.getAnnotation(ApplicationScoped.class) != null;
+    this.applicationScoped = controllerClass.isAnnotationPresent(ApplicationScoped.class);
   }
 
   public Object getController() {
@@ -43,7 +42,7 @@ public abstract class BasicInfo {
     }
     if (controllerClass != null) {
       Named named = controllerClass.getAnnotation(Named.class);
-      String controller = named.value();
+      String controller = named == null ? null : named.value();
       if (!Utility.isNullOrEmpty(controller)) {
         return controllerBean = JFlemaxController.findManagedBean(controller);
       }
