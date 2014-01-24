@@ -19,6 +19,7 @@ import com.anosym.utilities.IdGenerator;
 import com.anosym.utilities.Utility;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -425,14 +426,33 @@ public class PageInformation implements Serializable {
     }
     for (Class<?> c : annotatedBeans) {
       //process only if @Named
-      if (c.isAnnotationPresent(Named.class)) {
+      if (isAcceptableControler(c)) {
         pageInformation.processController(c);
       }
     }
     annotatedBeans = reflections.getTypesAnnotatedWith(OnRequest.class);
     for (Class<?> c : annotatedBeans) {
-      pageInformation.processController(c);
+      if (isAcceptableControler(c)) {
+        pageInformation.processController(c);
+      }
     }
+  }
+
+  private static boolean isAcceptableControler(Class c) {
+    int m = c.getModifiers();
+    return c.isAnnotationPresent(Named.class)
+            && !c.isAnnotation()
+            && !c.isAnnotation()
+            && !c.isAnonymousClass()
+            && !c.isArray()
+            && !c.isEnum()
+            && !c.isInterface()
+            && !c.isLocalClass()
+            && !c.isMemberClass()
+            && !c.isPrimitive()
+            && !c.isSynthetic()
+            && !Modifier.isAbstract(m)
+            && !Modifier.isInterface(m);
   }
 
   public static void onApplicationStart(String applicationPackage, String contextName) {
