@@ -149,7 +149,9 @@ public class PageInformation implements Serializable {
 
   private void addRequest(Class<?> cls) {
     OnRequest onRequest = cls.getAnnotation(OnRequest.class);
-    addRequest(onRequest, cls);
+    if (onRequest != null) {
+      addRequest(onRequest, cls);
+    }
     //do we have arrays
     OnRequests onRequests = cls.getAnnotation(OnRequests.class);
     if (onRequests != null) {
@@ -441,7 +443,6 @@ public class PageInformation implements Serializable {
   private static boolean isAcceptableControler(Class c) {
     int m = c.getModifiers();
     return c.isAnnotationPresent(Named.class)
-            && !c.isAnnotation()
             && !c.isAnnotation()
             && !c.isAnonymousClass()
             && !c.isArray()

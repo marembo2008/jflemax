@@ -7,12 +7,10 @@ package com.anosym.jflemax.validation;
 
 import com.anosym.jflemax.validation.annotation.JsfPhaseIdOption;
 import com.anosym.jflemax.validation.annotation.LoginStatus;
-import com.anosym.jflemax.validation.annotation.OnRequest;
 import com.anosym.jflemax.validation.annotation.Principal;
 import java.lang.reflect.Method;
 import java.util.Set;
 import javax.faces.event.PhaseId;
-import javax.inject.Named;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -23,24 +21,6 @@ import org.junit.Test;
  * @author marembo
  */
 public class PageInformationTest {
-
-  @OnRequest(toPages = "*")
-  public static class AbstractController {
-
-    public void onRequest() {
-      System.out.println("AbstractController: onRequest()");
-    }
-  }
-
-  @Named
-  public static class ControllerImpl extends AbstractController {
-
-    @Override
-    public void onRequest() {
-      System.out.println("ControllerImpl: OnRequest()");
-    }
-
-  }
 
   public static class PrincipleTest {
 
