@@ -18,7 +18,7 @@ public class AbstractController {
 
   @PostConstruct
   public void onPostConstruct() {
-//    System.out.println("Processing Page Information: " + this.getClass());
+//    com.anosym.jflemax.JFlemaxLogger.fine("Processing Page Information: " + this.getClass());
 //    //we need to add page information to application scope
 //    PageInformation pageInformation = PageInformation.getPageProcessor();
 //    pageInformation.processController(this);

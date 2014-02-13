@@ -15,6 +15,6 @@ import com.anosym.jflemax.validation.annotation.OnRequest;
 class AbstractControllerTest {
 
   public void onRequest() {
-    System.out.println("AbstractController: onRequest()");
+    com.anosym.jflemax.JFlemaxLogger.fine("AbstractController: onRequest()");
   }
 }

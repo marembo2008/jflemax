@@ -16,7 +16,7 @@ class ControllerImpl extends AbstractControllerTest {
 
   @Override
   public void onRequest() {
-    System.out.println("ControllerImpl: OnRequest()");
+    com.anosym.jflemax.JFlemaxLogger.fine("ControllerImpl: OnRequest()");
   }
 
 }

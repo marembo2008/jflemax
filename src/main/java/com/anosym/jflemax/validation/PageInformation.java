@@ -54,13 +54,13 @@ import org.reflections.util.FilterBuilder;
 public class PageInformation implements Serializable {
 
   static {
-    System.out.println("PageInformation: should not be created more than once!");
+    com.anosym.jflemax.JFlemaxLogger.fine("PageInformation: should not be created more than once!");
   }
   private static final long serialVersionUID = IdGenerator.serialVersionUID(PageInformation.class);
   private static PageInformation pageInformation;
   private Map<String, Set<RequestInfo>> onRequestInfos = new HashMap<String, Set<RequestInfo>>();
   private String contextPath;
-  private Comparator<RequestInfo> comparator = new Comparator<RequestInfo>() {
+  private final Comparator<RequestInfo> comparator = new Comparator<RequestInfo>() {
     @Override
     public int compare(RequestInfo o1, RequestInfo o2) {
       Integer p0 = o1.getPriority();
@@ -71,7 +71,7 @@ public class PageInformation implements Serializable {
   private PrincipalInfo principalInfo;
   private IndexPathInfo indexPathInfo;
   private boolean debugging;
-  private Calendar lastReload = Calendar.getInstance();
+  private final Calendar lastReload = Calendar.getInstance();
   private int reloadPeriod;
   /**
    * Information relating to page caches.
@@ -201,6 +201,7 @@ public class PageInformation implements Serializable {
         onRequestInfos.put(toPage, requestInfos);
       }
       requestInfos.add(info);
+      com.anosym.jflemax.JFlemaxLogger.fine(toPage + ": " + requestInfos);
     }
   }
 
@@ -322,8 +323,7 @@ public class PageInformation implements Serializable {
 
   public synchronized void removeFromQueue(RequestInfo requestInfo) {
     Collection<Set<RequestInfo>> values = onRequestInfos.values();
-    for (Iterator<Set<RequestInfo>> i = values.iterator(); i.hasNext();) {
-      Set<RequestInfo> set = i.next();
+    for (Set<RequestInfo> set : values) {
       for (Iterator<RequestInfo> ii = set.iterator(); ii.hasNext();) {
         RequestInfo info = ii.next();
         if (info.equals(requestInfo)) {

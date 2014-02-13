@@ -42,8 +42,6 @@ import javax.servlet.http.HttpSession;
  */
 public class JFlemaxController {
 
-  private static final Logger LOG = Logger.getLogger(JFlemaxController.class.getName());
-
   public static final String IGNORE_VALIDATION = "ignore_validate";
   public static final String APPLICATION_PACKAGE = "application_package";
 
@@ -359,9 +357,7 @@ public class JFlemaxController {
             .addResponseCookie(name, value, cookieParams);
   }
 
-  /**
-   * Call this method at prerender view
-   */
+  @SuppressWarnings({"UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch"})
   protected void validateRequest() {
     //get parameter for ignore request
     String value = getParameter(IGNORE_VALIDATION);
@@ -386,19 +382,19 @@ public class JFlemaxController {
       boolean loginRequest = (getPrinciple() != null);
       List<RequestInfo> infos = new ArrayList<RequestInfo>();
       for (RequestInfo requestInfo : requestInfos) {
-        RequestStatus requestStatus = requestInfo.getRequestStatus();
-        LoginStatus loginStatus = requestInfo.getLoginStatus();
-        boolean executeOnAjax = (ajaxRequest && (requestStatus == RequestStatus.AJAX_REQUEST))
-                || (!ajaxRequest && (requestStatus == RequestStatus.FULL_REQUEST))
-                || (requestStatus == RequestStatus.ANY_REQUEST);
-        boolean executeOnLogin = (loginRequest && (loginStatus == LoginStatus.WHEN_LOGGED_IN))
-                || (!loginRequest && (loginStatus == LoginStatus.WHEN_LOGGED_OUT))
-                || (loginStatus == LoginStatus.EITHER);
-        boolean executeValidate = executeOnAjax && executeOnLogin;
-        if (executeValidate) {
-          Object controller = JFlemaxController.findManagedBean(requestInfo.getController());
-          if (controller != null) {
-            try {
+        try {
+          RequestStatus requestStatus = requestInfo.getRequestStatus();
+          LoginStatus loginStatus = requestInfo.getLoginStatus();
+          boolean executeOnAjax = (ajaxRequest && (requestStatus == RequestStatus.AJAX_REQUEST))
+                  || (!ajaxRequest && (requestStatus == RequestStatus.FULL_REQUEST))
+                  || (requestStatus == RequestStatus.ANY_REQUEST);
+          boolean executeOnLogin = (loginRequest && (loginStatus == LoginStatus.WHEN_LOGGED_IN))
+                  || (!loginRequest && (loginStatus == LoginStatus.WHEN_LOGGED_OUT))
+                  || (loginStatus == LoginStatus.EITHER);
+          boolean executeValidate = executeOnAjax && executeOnLogin;
+          if (executeValidate) {
+            Object controller = JFlemaxController.findManagedBean(requestInfo.getController());
+            if (controller != null) {
               Class<?> controllerClass = controller.getClass();
               Method validatingMethod = controllerClass.getDeclaredMethod(requestInfo.getOnRequestMethod(), new Class<?>[]{});
               if (validatingMethod != null) {
@@ -412,14 +408,14 @@ public class JFlemaxController {
                   }
                 }
               }
-            } catch (Exception e) {
-              logError(e);
-            } finally {
-              //check if the request is to be executed only once, and then removed from the queue
-              if (requestInfo.getExecuteCycle() == ExecuteCycle.ONCE) {
-                pageInformation.removeFromQueue(requestInfo);
-              }
             }
+          }
+        } catch (Exception e) {
+          logError(e);
+        } finally {
+          //check if the request is to be executed only once, and then removed from the queue
+          if (requestInfo.getExecuteCycle() == ExecuteCycle.ONCE) {
+            pageInformation.removeFromQueue(requestInfo);
           }
         }
       }
@@ -432,14 +428,14 @@ public class JFlemaxController {
     //get parameter for ignore request
     String value = getParameter(IGNORE_VALIDATION);
     if (value != null && Boolean.valueOf(value)) {
-      LOG.fine("Ignoring validation");
+      com.anosym.jflemax.JFlemaxLogger.fine("Ignoring validation");
       return;
     }
     String requestPath = getRequestPath();
     String referingPath = getReferringPath();
     String contextPath = getContextPath();
-    LOG.log(Level.FINE, "Request Path: {0}", requestPath);
-    LOG.log(Level.FINE, "Referring Path: {0}", referingPath);
+    com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "Request Path: {0}", requestPath);
+    com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "Referring Path: {0}", referingPath);
     if (referingPath != null && referingPath.contains(contextPath)) {
       referingPath = referingPath.substring(referingPath.indexOf(contextPath) + contextPath.length());
     }
@@ -457,25 +453,25 @@ public class JFlemaxController {
       Map<RequestInfo, Boolean> infos = new HashMap<RequestInfo, Boolean>();
       Map<RequestInfo, Integer> infos0 = new HashMap<RequestInfo, Integer>();
       for (RequestInfo requestInfo : requestInfos) {
-        LOG.log(Level.FINE, "Request Info: {0}", requestInfo);
-        RequestStatus requestStatus = requestInfo.getRequestStatus();
-        LoginStatus loginStatus = requestInfo.getLoginStatus();
-        boolean executeOnAjax = (ajaxRequest && (requestStatus == RequestStatus.AJAX_REQUEST))
-                || (!ajaxRequest && (requestStatus == RequestStatus.FULL_REQUEST))
-                || (requestStatus == RequestStatus.ANY_REQUEST);
-        boolean executeOnLogin = (loginRequest && (loginStatus == LoginStatus.WHEN_LOGGED_IN))
-                || (!loginRequest && (loginStatus == LoginStatus.WHEN_LOGGED_OUT))
-                || (loginStatus == LoginStatus.EITHER);
-        boolean executeValidate = executeOnAjax && executeOnLogin;
-        if (executeValidate) {
-          Object controller = JFlemaxController.findManagedBean(requestInfo.getController());
-          if (controller != null) {
-            try {
+        try {
+          com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "Request Info: {0}", requestInfo);
+          RequestStatus requestStatus = requestInfo.getRequestStatus();
+          LoginStatus loginStatus = requestInfo.getLoginStatus();
+          boolean executeOnAjax = (ajaxRequest && (requestStatus == RequestStatus.AJAX_REQUEST))
+                  || (!ajaxRequest && (requestStatus == RequestStatus.FULL_REQUEST))
+                  || (requestStatus == RequestStatus.ANY_REQUEST);
+          boolean executeOnLogin = (loginRequest && (loginStatus == LoginStatus.WHEN_LOGGED_IN))
+                  || (!loginRequest && (loginStatus == LoginStatus.WHEN_LOGGED_OUT))
+                  || (loginStatus == LoginStatus.EITHER);
+          boolean executeValidate = executeOnAjax && executeOnLogin;
+          if (executeValidate) {
+            Object controller = JFlemaxController.findManagedBean(requestInfo.getController());
+            if (controller != null) {
               Class<?> controllerClass = controller.getClass();
               Method validatingMethod = controllerClass.getDeclaredMethod(requestInfo.getOnRequestMethod(), new Class<?>[]{});
               if (validatingMethod != null) {
                 Object res = validatingMethod.invoke(controller, new Object[]{});
-                LOG.log(Level.FINE, "OnRequestMethod invoked: {0}", validatingMethod.getName());
+                com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "OnRequestMethod invoked: {0}", validatingMethod.getName());
                 if (res != null) {
                   if (res instanceof Boolean) {
                     Boolean state = (Boolean) res;
@@ -494,9 +490,14 @@ public class JFlemaxController {
                   }
                 }
               }
-            } catch (Exception e) {
-              logError(e);
             }
+          }
+        } catch (Exception e) {
+          logError(e);
+        } finally {
+          //check if the request is to be executed only once, and then removed from the queue
+          if (requestInfo.getExecuteCycle() == ExecuteCycle.ONCE) {
+            pageInformation.removeFromQueue(requestInfo);
           }
         }
       }

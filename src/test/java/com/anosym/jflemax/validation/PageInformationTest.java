@@ -65,7 +65,7 @@ public class PageInformationTest {
     for (Method m : ms) {
       if (m.isAnnotationPresent(Principal.class)) {
         present = true;
-        System.out.println(m);
+        com.anosym.jflemax.JFlemaxLogger.fine(m);
         break;
       }
     }

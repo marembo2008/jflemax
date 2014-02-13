@@ -71,7 +71,7 @@ public class FileServlet extends HttpServlet {
 
     // Get base path (path to get all resources from) as init parameter.
     this.basePath = getBasePath();
-    System.out.println("FileServlet BasePath: " + basePath);
+    com.anosym.jflemax.JFlemaxLogger.fine("FileServlet BasePath: " + basePath);
 
     // Validate base path.
     if (this.basePath == null) {
@@ -148,7 +148,7 @@ public class FileServlet extends HttpServlet {
 
     // URL-decode the file name (might contain spaces and on) and prepare file object.
     File file = new File(basePath, SERVLET_URL + File.separator + URLDecoder.decode(requestedFile, "UTF-8"));
-    System.out.println("Loading resource from FileServlet: " + file.getAbsolutePath());
+    com.anosym.jflemax.JFlemaxLogger.fine("Loading resource from FileServlet: " + file.getAbsolutePath());
     // Check if file actually exists in filesystem.
     if (!file.exists()) {
       // Do your thing if the file appears to be non-existing.
