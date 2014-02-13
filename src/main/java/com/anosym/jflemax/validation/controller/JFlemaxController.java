@@ -42,6 +42,8 @@ import javax.servlet.http.HttpSession;
  */
 public class JFlemaxController {
 
+  private static final Logger LOG = Logger.getLogger(JFlemaxController.class.getName());
+
   public static final String IGNORE_VALIDATION = "ignore_validate";
   public static final String APPLICATION_PACKAGE = "application_package";
 
@@ -425,15 +427,19 @@ public class JFlemaxController {
     }
   }
 
+  @SuppressWarnings({"UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch"})
   protected void validateRequest(PhaseId phaseId, JsfPhaseIdOption jsfPhaseIdOption) {
     //get parameter for ignore request
     String value = getParameter(IGNORE_VALIDATION);
     if (value != null && Boolean.valueOf(value)) {
+      LOG.fine("Ignoring validation");
       return;
     }
     String requestPath = getRequestPath();
     String referingPath = getReferringPath();
     String contextPath = getContextPath();
+    LOG.log(Level.FINE, "Request Path: {0}", requestPath);
+    LOG.log(Level.FINE, "Referring Path: {0}", referingPath);
     if (referingPath != null && referingPath.contains(contextPath)) {
       referingPath = referingPath.substring(referingPath.indexOf(contextPath) + contextPath.length());
     }
@@ -451,6 +457,7 @@ public class JFlemaxController {
       Map<RequestInfo, Boolean> infos = new HashMap<RequestInfo, Boolean>();
       Map<RequestInfo, Integer> infos0 = new HashMap<RequestInfo, Integer>();
       for (RequestInfo requestInfo : requestInfos) {
+        LOG.log(Level.FINE, "Request Info: {0}", requestInfo);
         RequestStatus requestStatus = requestInfo.getRequestStatus();
         LoginStatus loginStatus = requestInfo.getLoginStatus();
         boolean executeOnAjax = (ajaxRequest && (requestStatus == RequestStatus.AJAX_REQUEST))
@@ -468,6 +475,7 @@ public class JFlemaxController {
               Method validatingMethod = controllerClass.getDeclaredMethod(requestInfo.getOnRequestMethod(), new Class<?>[]{});
               if (validatingMethod != null) {
                 Object res = validatingMethod.invoke(controller, new Object[]{});
+                LOG.log(Level.FINE, "OnRequestMethod invoked: {0}", validatingMethod.getName());
                 if (res != null) {
                   if (res instanceof Boolean) {
                     Boolean state = (Boolean) res;
@@ -475,7 +483,6 @@ public class JFlemaxController {
                             || (!state && requestInfo.getRedirectStatus() == RedirectStatus.ON_FAILURE)
                             || requestInfo.getRedirectStatus() == RedirectStatus.ALWAYS;
                     if (doRedirect && requestInfo.isRedirect()) {
-                      System.out.println("Redirect: OnRequestMethod=" + validatingMethod.getName());
                       infos.put(requestInfo, state);
                     }
                   } else if (res instanceof Integer) {
