@@ -462,7 +462,6 @@ public class JFlemaxController {
       Map<RequestInfo, Integer> infos0 = new HashMap<RequestInfo, Integer>();
       for (RequestInfo requestInfo : requestInfos) {
         Object result = null;
-        boolean continue_ = true;
         try {
           com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "Request Info: {0}", requestInfo);
           RequestStatus requestStatus = requestInfo.getRequestStatus();
@@ -509,10 +508,9 @@ public class JFlemaxController {
           if (requestInfo.getExecuteCycle() == ExecuteCycle.ONCE) {
             pageInformation.removeFromQueue(requestInfo);
           }
-          //check if other requests are supposed to be executed.
-          continue_ = determineAfterExecute(requestInfo, result);
         }
-        if (!continue_) {
+        //check if other requests are supposed to be executed.
+        if (!determineAfterExecute(requestInfo, result)) {
           break;
         }
       }
