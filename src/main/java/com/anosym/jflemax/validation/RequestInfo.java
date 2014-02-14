@@ -4,6 +4,7 @@
  */
 package com.anosym.jflemax.validation;
 
+import com.anosym.jflemax.validation.annotation.AfterExecute;
 import com.anosym.jflemax.validation.annotation.ExecuteCycle;
 import com.anosym.jflemax.validation.annotation.LoginStatus;
 import com.anosym.jflemax.validation.annotation.RedirectStatus;
@@ -35,6 +36,7 @@ public class RequestInfo implements Serializable {
   private int priority;
   private JsfPhaseInfo[] jsfPhaseInfos;
   private ExecuteCycle executeCycle;
+  private AfterExecute afterExecute;
 
   public RequestInfo() {
     toPages = new HashSet<String>();
@@ -44,7 +46,8 @@ public class RequestInfo implements Serializable {
           String controller, Set<String> toPages, String onRequestMethod,
           String redirectPage, boolean redirect, RequestStatus requestStatus, LoginStatus loginStatus,
           String[] excludedPages, RedirectStatus redirectStatus, JsfPhaseInfo[] jsfPhaseInfos,
-          ExecuteCycle executeCycle, String redirectFailurePage, boolean redirectOnResult, String[] redirectPages) {
+          ExecuteCycle executeCycle, String redirectFailurePage, boolean redirectOnResult, String[] redirectPages,
+          AfterExecute afterExecute, int priority) {
     this.controller = controller;
     this.toPages = toPages;
     this.onRequestMethod = onRequestMethod;
@@ -59,34 +62,56 @@ public class RequestInfo implements Serializable {
     this.redirectFailurePage = redirectFailurePage;
     this.redirectOnResult = redirectOnResult;
     this.redirectPages = redirectPages;
+    this.afterExecute = afterExecute;
+    this.priority = priority;
   }
 
-  public void setRedirectPages(String[] redirectPages) {
-    this.redirectPages = redirectPages;
+  public String getController() {
+    return controller;
+  }
+
+  public Set<String> getToPages() {
+    return toPages;
+  }
+
+  public String getOnRequestMethod() {
+    return onRequestMethod;
+  }
+
+  public String getRedirectPage() {
+    return redirectPage;
+  }
+
+  public String getRedirectFailurePage() {
+    return redirectFailurePage;
+  }
+
+  public boolean isRedirect() {
+    return redirect;
   }
 
   public boolean isRedirectOnResult() {
     return redirectOnResult;
   }
 
-  public void setRedirectOnResult(boolean redirectOnResult) {
-    this.redirectOnResult = redirectOnResult;
-  }
-
   public String[] getRedirectPages() {
     return redirectPages;
   }
 
-  public void setPriority(int priority) {
-    this.priority = priority;
+  public RequestStatus getRequestStatus() {
+    return requestStatus;
   }
 
-  public void setExecuteCycle(ExecuteCycle executeCycle) {
-    this.executeCycle = executeCycle;
+  public LoginStatus getLoginStatus() {
+    return loginStatus;
   }
 
-  public ExecuteCycle getExecuteCycle() {
-    return executeCycle;
+  public String[] getExcludedPages() {
+    return excludedPages;
+  }
+
+  public RedirectStatus getRedirectStatus() {
+    return redirectStatus;
   }
 
   public int getPriority() {
@@ -97,88 +122,12 @@ public class RequestInfo implements Serializable {
     return jsfPhaseInfos;
   }
 
-  public void setJsfPhaseInfos(JsfPhaseInfo[] jsfPhaseInfos) {
-    this.jsfPhaseInfos = jsfPhaseInfos;
+  public ExecuteCycle getExecuteCycle() {
+    return executeCycle;
   }
 
-  public RedirectStatus getRedirectStatus() {
-    return redirectStatus;
-  }
-
-  public void setRedirectStatus(RedirectStatus redirectStatus) {
-    this.redirectStatus = redirectStatus;
-  }
-
-  public void setRedirectFailurePage(String redirectFailurePage) {
-    this.redirectFailurePage = redirectFailurePage;
-  }
-
-  public String getRedirectFailurePage() {
-    return redirectFailurePage;
-  }
-
-  public String[] getExcludedPages() {
-    return excludedPages;
-  }
-
-  public RequestStatus getRequestStatus() {
-    return requestStatus;
-  }
-
-  public void setRequestStatus(RequestStatus requestStatus) {
-    this.requestStatus = requestStatus;
-  }
-
-  public void setExcludedPages(String[] excludedPages) {
-    this.excludedPages = excludedPages;
-  }
-
-  public LoginStatus getLoginStatus() {
-    return loginStatus;
-  }
-
-  public void setLoginStatus(LoginStatus loginStatus) {
-    this.loginStatus = loginStatus;
-  }
-
-  public String getRedirectPage() {
-    return redirectPage;
-  }
-
-  public void setRedirectPage(String redirectPage) {
-    this.redirectPage = redirectPage;
-  }
-
-  public boolean isRedirect() {
-    return redirect;
-  }
-
-  public void setRedirect(boolean redirect) {
-    this.redirect = redirect;
-  }
-
-  public String getController() {
-    return controller;
-  }
-
-  public void setController(String controller) {
-    this.controller = controller;
-  }
-
-  public Set<String> getToPages() {
-    return toPages;
-  }
-
-  public void setToPages(Set<String> toPages) {
-    this.toPages = toPages;
-  }
-
-  public String getOnRequestMethod() {
-    return onRequestMethod;
-  }
-
-  public void setOnRequestMethod(String onRequestMethod) {
-    this.onRequestMethod = onRequestMethod;
+  public AfterExecute getAfterExecute() {
+    return afterExecute;
   }
 
   @Override

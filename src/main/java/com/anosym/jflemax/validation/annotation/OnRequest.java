@@ -144,4 +144,13 @@ public @interface OnRequest {
    * @return
    */
   ExecuteCycle execute() default ExecuteCycle.ALWAYS;
+
+  /**
+   * Be carefully on this. It is sometimes impossible to tell when to continue to execute other
+   * requests or not. But if execution of other request callbacks are unimportant, you can determine
+   * the After Execute status of the validator.
+   *
+   * @return
+   */
+  AfterExecute afterExecute() default AfterExecute.CONTINUE;
 }

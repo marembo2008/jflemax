@@ -461,6 +461,8 @@ public class JFlemaxController {
       Map<RequestInfo, Boolean> infos = new HashMap<RequestInfo, Boolean>();
       Map<RequestInfo, Integer> infos0 = new HashMap<RequestInfo, Integer>();
       for (RequestInfo requestInfo : requestInfos) {
+        Object result = null;
+        boolean continue_ = true;
         try {
           com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "Request Info: {0}", requestInfo);
           RequestStatus requestStatus = requestInfo.getRequestStatus();
@@ -478,19 +480,19 @@ public class JFlemaxController {
               Class<?> controllerClass = controller.getClass();
               Method validatingMethod = controllerClass.getDeclaredMethod(requestInfo.getOnRequestMethod(), new Class<?>[]{});
               if (validatingMethod != null) {
-                Object res = validatingMethod.invoke(controller, new Object[]{});
+                result = validatingMethod.invoke(controller, new Object[]{});
                 com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "OnRequestMethod invoked: {0}", validatingMethod.getName());
-                if (res != null) {
-                  if (res instanceof Boolean) {
-                    Boolean state = (Boolean) res;
+                if (result != null) {
+                  if (result instanceof Boolean) {
+                    Boolean state = (Boolean) result;
                     boolean doRedirect = (state && requestInfo.getRedirectStatus() == RedirectStatus.ON_SUCCESS)
                             || (!state && requestInfo.getRedirectStatus() == RedirectStatus.ON_FAILURE)
                             || requestInfo.getRedirectStatus() == RedirectStatus.ALWAYS;
                     if (doRedirect && requestInfo.isRedirect()) {
                       infos.put(requestInfo, state);
                     }
-                  } else if (res instanceof Integer) {
-                    Integer i = (Integer) res;
+                  } else if (result instanceof Integer) {
+                    Integer i = (Integer) result;
                     boolean doRedirect = requestInfo.getRedirectStatus() == RedirectStatus.ALWAYS;
                     if (doRedirect && requestInfo.isRedirectOnResult()) {
                       infos0.put(requestInfo, i);
@@ -507,11 +509,36 @@ public class JFlemaxController {
           if (requestInfo.getExecuteCycle() == ExecuteCycle.ONCE) {
             pageInformation.removeFromQueue(requestInfo);
           }
+          //check if other requests are supposed to be executed.
+          continue_ = determineAfterExecute(requestInfo, result);
         }
       }
       redirectRequest(infos, referingPath);
       redirectRequest0(infos0, referingPath);
     }
+  }
+
+  private boolean determineAfterExecute(RequestInfo requestInfo, Object result) {
+    boolean continue_;
+    switch (requestInfo.getAfterExecute()) {
+      case CONTINUE:
+        continue_ = true;
+        break;
+      case STOP:
+        continue_ = false;
+        break;
+      case CONTINUE_ON_FAILURE:
+      case STOP_ON_SUCCESS:
+        continue_ = result != null && Boolean.class.isAssignableFrom(result.getClass()) && !Boolean.class.cast(result);
+        break;
+      case CONTINUE_ON_SUCCESS:
+      case STOP_ON_FAILURE:
+        continue_ = result != null && Boolean.class.isAssignableFrom(result.getClass()) && Boolean.class.cast(result);
+        break;
+      default:
+        continue_ = true;
+    }
+    return continue_;
   }
 
   private void redirectRequest(Map<RequestInfo, Boolean> infos, String referingPath) {

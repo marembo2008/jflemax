@@ -192,8 +192,7 @@ public class PageInformation implements Serializable {
             onRequest.onRequestMethod(), onRequest.redirectPage(), onRequest.redirect(),
             onRequest.requestStatus(), onRequest.logInStatus(), onRequest.excludedPages(),
             onRequest.redirectStatus(), phaseInfos, onRequest.execute(), onRequest.redirectFailurePage(),
-            onRequest.redirectOnResult(), onRequest.redirectPages());
-    info.setPriority(onRequest.priority());
+            onRequest.redirectOnResult(), onRequest.redirectPages(), onRequest.afterExecute(), onRequest.priority());
     for (String toPage : toPages) {
       Set<RequestInfo> requestInfos = onRequestInfos.get(toPage);
       if (requestInfos == null) {
