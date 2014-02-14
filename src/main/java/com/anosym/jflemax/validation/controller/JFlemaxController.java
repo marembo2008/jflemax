@@ -512,6 +512,9 @@ public class JFlemaxController {
           //check if other requests are supposed to be executed.
           continue_ = determineAfterExecute(requestInfo, result);
         }
+        if (!continue_) {
+          break;
+        }
       }
       redirectRequest(infos, referingPath);
       redirectRequest0(infos0, referingPath);

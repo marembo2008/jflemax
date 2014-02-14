@@ -150,6 +150,11 @@ public @interface OnRequest {
    * requests or not. But if execution of other request callbacks are unimportant, you can determine
    * the After Execute status of the validator.
    *
+   * <pre>
+   * It is very important that if a different execute behaviour is specified, the priority of this request callback
+   * is considered, and determines the behaviour of the all request callbacks in the current queue.
+   * </pre>
+   *
    * @return
    */
   AfterExecute afterExecute() default AfterExecute.CONTINUE;
