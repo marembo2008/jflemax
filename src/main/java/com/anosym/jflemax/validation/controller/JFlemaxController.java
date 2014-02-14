@@ -131,9 +131,17 @@ public class JFlemaxController {
     return ((ServletContext) context.getExternalContext().getContext()).getContextPath();
   }
 
+  /**
+   * Returns empty string if the context path is null or empty.
+   *
+   * @return
+   */
   public static String getContextName() {
     String context = getContextPath();
-    return context.substring(1);
+    if (!Utility.isNullOrEmpty(context)) {
+      return context.substring(1);
+    }
+    return "";
   }
 
   public static String getRequestPath() {
