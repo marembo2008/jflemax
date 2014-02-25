@@ -59,6 +59,10 @@ public class FileServlet extends HttpServlet {
   public static String getBasePath() {
     return System.getProperty(BASE_PATH);
   }
+
+  public static File getFullPath() {
+    return new File(getBasePath(), SERVLET_URL);
+  }
   // Actions ------------------------------------------------------------------------------------
   /**
    * Initialize the servlet.
