@@ -766,7 +766,7 @@ public class JFlemaxController {
    * @param pathExtension
    * @return
    */
-  public static List<String> aplicationResourcePaths(String pathExtension) {
+  public static List<String> applicationResourcePaths(String pathExtension) {
     File currentApplicationPath = new File("");
     JFlemaxLogger.info("Current Application Path: " + currentApplicationPath.getAbsolutePath());
     List<String> resources = new ArrayList<String>();
@@ -782,6 +782,7 @@ public class JFlemaxController {
       }
     } else if (path.isFile() && path.getName().endsWith(pathExtension)) {
       String actualPath = path.getAbsolutePath();
+      JFlemaxLogger.info("Found path: " + actualPath);
       String contextPath = actualPath.substring(realPath.length());
       contextPath = contextPath.startsWith("/") ? contextPath : "/" + contextPath;
       resources.add(contextPath);
