@@ -4,6 +4,7 @@
  */
 package com.anosym.jflemax.validation.controller;
 
+import com.anosym.jflemax.JFlemaxLogger;
 import com.anosym.jflemax.validation.PageInformation;
 import com.anosym.jflemax.validation.RequestInfo;
 import com.anosym.jflemax.validation.RequestStatus;
@@ -751,19 +752,35 @@ public class JFlemaxController {
     String path = sc.getRealPath("/");
     if (!Utility.isNullOrEmpty(path)) {
       List<String> resources = new ArrayList<String>();
-      getResources(path, new File(path), resources);
+      getResources(path, new File(path), resources, ".xhtml");
       return resources;
     }
     return Collections.EMPTY_LIST;
   }
 
-  private static void getResources(String realPath, File path, List<String> resources) {
+  /**
+   * Returns all context relative paths of all resources that end in .xhtml.
+   *
+   * We use the current application path to retrieve the resources.
+   *
+   * @param pathExtension
+   * @return
+   */
+  public static List<String> aplicationResourcePaths(String pathExtension) {
+    File currentApplicationPath = new File("");
+    JFlemaxLogger.info("Current Application Path: " + currentApplicationPath.getAbsolutePath());
+    List<String> resources = new ArrayList<String>();
+    getResources(currentApplicationPath.getAbsolutePath(), currentApplicationPath, resources, pathExtension);
+    return resources;
+  }
+
+  private static void getResources(String realPath, File path, List<String> resources, String pathExtension) {
     if (path.isDirectory()) {
       File[] paths = path.listFiles();
       for (File path_d : paths) {
-        getResources(realPath, path_d, resources);
+        getResources(realPath, path_d, resources, pathExtension);
       }
-    } else if (path.isFile() && path.getName().endsWith(".xhtml")) {
+    } else if (path.isFile() && path.getName().endsWith(pathExtension)) {
       String actualPath = path.getAbsolutePath();
       String contextPath = actualPath.substring(realPath.length());
       contextPath = contextPath.startsWith("/") ? contextPath : "/" + contextPath;
