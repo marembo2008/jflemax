@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.anosym.jflemax.validation.controller;
 
 import com.anosym.jflemax.JFlemaxLogger;
@@ -435,7 +431,7 @@ public class JFlemaxController {
     }
 
     @SuppressWarnings({"UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch"})
-    protected void validateRequest(PhaseId phaseId, JsfPhaseIdOption jsfPhaseIdOption) {
+    protected void validateRequest(PhaseId phaseId, JsfPhaseIdOption jsfPhaseIdOption) throws Exception {
         //get parameter for ignore request
         String value = getParameter(IGNORE_VALIDATION);
         if (value != null && Boolean.valueOf(value)) {
@@ -506,8 +502,6 @@ public class JFlemaxController {
                             }
                         }
                     }
-                } catch (Exception e) {
-                    logError(e);
                 } finally {
                     //check if the request is to be executed only once, and then removed from the queue
                     if (requestInfo.getExecuteCycle() == ExecuteCycle.ONCE) {
