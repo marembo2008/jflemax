@@ -1,17 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.anosym.jflemax.validation.session;
 
 import com.anosym.ip.mapping.IpMapping;
-import com.anosym.jflemax.JFlemaxLogger;
 import com.anosym.jflemax.validation.controller.JFlemaxController;
 import com.anosym.utilities.geocode.CountryCode;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -21,7 +17,10 @@ import javax.servlet.http.HttpSessionListener;
  * @author marembo
  */
 @WebListener
+@Deprecated
 public class JFlemaxSessionController implements HttpSessionListener {
+
+    private static final Logger LOG = Logger.getLogger(JFlemaxSessionController.class.getName());
 
     private static final Map<String, Object> SESSION_USERS = new HashMap<String, Object>();
     //get active sessions and countries.
@@ -36,7 +35,7 @@ public class JFlemaxSessionController implements HttpSessionListener {
             String countryName = country != null ? country.getName() : "No Country found for: " + ip;
             CURRENT_ACTIVE_SESSIONS.put(sessionId, new JCurrentSession(sessionId, countryName));
         } catch (Exception ex) {
-            JFlemaxLogger.log(Level.SEVERE, "Error on session created", ex);
+            LOG.log(Level.SEVERE, "Error on session created", ex);
         }
     }
 
@@ -50,10 +49,12 @@ public class JFlemaxSessionController implements HttpSessionListener {
     public static void updateRequestPath(String sessionId, String requestPath) {
         try {
             JCurrentSession currentSession = CURRENT_ACTIVE_SESSIONS.get(sessionId);
-            currentSession.setCurrentPage(requestPath);
-            currentSession.setUserAgent(JFlemaxController.getCurrentUserAgent());
+            if (currentSession != null) {
+                currentSession.setCurrentPage(requestPath);
+                currentSession.setUserAgent(JFlemaxController.getCurrentUserAgent());
+            }
         } catch (Exception e) {
-            JFlemaxLogger.log(Level.SEVERE, "Error updating session path for current session", e);
+            LOG.log(Level.SEVERE, "Error updating session path for current session", e);
         }
     }
 

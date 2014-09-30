@@ -47,7 +47,7 @@ public class JFlemaxController {
         return IGNORE_VALIDATION;
     }
 
-    public static <T> T getPrinciple() {
+    public static <T> T getPrincipal() {
         if (PageInformation.getPageProcessor().getPrincipalInfo() != null) {
             return PageInformation.getPageProcessor().getPrincipalInfo().getUserPrinciple();
         }
@@ -379,13 +379,13 @@ public class JFlemaxController {
         PageInformation pageInformation = getPageInformation();
         if (pageInformation != null) {
             Set<RequestInfo> requestInfos = pageInformation.getRequestInfos(requestPath,
-                                                                            getPrinciple() != null ? LoginStatus.WHEN_LOGGED_IN : LoginStatus.WHEN_LOGGED_OUT);
+                                                                            getPrincipal() != null ? LoginStatus.WHEN_LOGGED_IN : LoginStatus.WHEN_LOGGED_OUT);
             if (requestInfos == null) {
                 return;
             }
             FacesContext context = FacesContext.getCurrentInstance();
             boolean ajaxRequest = context.getPartialViewContext().isAjaxRequest();
-            boolean loginRequest = (getPrinciple() != null);
+            boolean loginRequest = (getPrincipal() != null);
             List<RequestInfo> infos = new ArrayList<RequestInfo>();
             for (RequestInfo requestInfo : requestInfos) {
                 try {
@@ -448,15 +448,16 @@ public class JFlemaxController {
         }
         PageInformation pageInformation = getPageInformation();
         if (pageInformation != null) {
-            Set<RequestInfo> requestInfos = pageInformation.getRequestInfos(requestPath,
-                                                                            getPrinciple() != null ? LoginStatus.WHEN_LOGGED_IN : LoginStatus.WHEN_LOGGED_OUT,
-                                                                            phaseId, jsfPhaseIdOption);
+            final LoginStatus principalLoginStatus = getPrincipal() != null
+                    ? LoginStatus.WHEN_LOGGED_IN : LoginStatus.WHEN_LOGGED_OUT;
+            final Set<RequestInfo> requestInfos = pageInformation
+                    .getRequestInfos(requestPath, principalLoginStatus, phaseId, jsfPhaseIdOption);
             if (requestInfos == null) {
                 return;
             }
             FacesContext context = FacesContext.getCurrentInstance();
             boolean ajaxRequest = context.getPartialViewContext().isAjaxRequest();
-            boolean loginRequest = (getPrinciple() != null);
+            boolean loginRequest = (getPrincipal() != null);
             Map<RequestInfo, Boolean> infos = new HashMap<RequestInfo, Boolean>();
             Map<RequestInfo, Integer> infos0 = new HashMap<RequestInfo, Integer>();
             for (RequestInfo requestInfo : requestInfos) {
