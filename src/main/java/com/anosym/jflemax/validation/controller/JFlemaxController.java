@@ -10,8 +10,10 @@ import com.anosym.jflemax.validation.annotation.LoginStatus;
 import com.anosym.jflemax.validation.annotation.RedirectStatus;
 import com.anosym.jflemax.validation.browser.UserAgent;
 import com.anosym.utilities.Utility;
+import com.google.common.base.Throwables;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +41,8 @@ import javax.servlet.http.HttpSession;
  * @author marembo
  */
 public class JFlemaxController {
+
+    private static final Logger LOG = Logger.getLogger(JFlemaxController.class.getName());
 
     public static final String IGNORE_VALIDATION = "ignore_validate";
     public static final String APPLICATION_PACKAGE = "application_package";
@@ -103,7 +107,7 @@ public class JFlemaxController {
             context.getExternalContext().redirect(to);
             context.responseComplete();
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(JFlemaxController.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -480,9 +484,13 @@ public class JFlemaxController {
                             Method validatingMethod = controllerClass.
                                     getDeclaredMethod(requestInfo.getOnRequestMethod(), new Class<?>[]{});
                             if (validatingMethod != null) {
-                                result = validatingMethod.invoke(controller, new Object[]{});
-                                com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "OnRequestMethod invoked: {0}",
-                                                                     validatingMethod.getName());
+                                try {
+                                    result = validatingMethod.invoke(controller, new Object[]{});
+                                } catch (final InvocationTargetException ite) {
+                                    //we propagate the cause of the exception
+                                    throw Throwables.propagate(ite.getCause());
+                                }
+                                LOG.log(Level.FINE, "OnRequestMethod invoked: {0}", validatingMethod.getName());
                                 if (result != null) {
                                     if (result instanceof Boolean) {
                                         Boolean state = (Boolean) result;
