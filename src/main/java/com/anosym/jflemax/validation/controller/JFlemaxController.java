@@ -347,7 +347,7 @@ public class JFlemaxController {
                 .addResponseCookie(name, value, cookieParams);
     }
 
-    private BeanManager getBeanManager() {
+    private static BeanManager getBeanManager() {
         try {
             return (BeanManager) InitialContext.doLookup("java:comp/BeanManager");
         } catch (final NamingException e) {
@@ -356,7 +356,7 @@ public class JFlemaxController {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T lookup(final Class<T> clazz) {
+    public static <T> T lookup(final Class<T> clazz) {
         final BeanManager bm = getBeanManager();
         final Iterator<Bean<?>> iter = bm.getBeans(clazz).iterator();
         if (!iter.hasNext()) {
