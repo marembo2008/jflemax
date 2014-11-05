@@ -18,18 +18,21 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.el.ELResolver;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseId;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +40,7 @@ import javax.servlet.http.HttpSession;
 
 /**
  * All method calls within this class expect FacesContext. Do not call if not within jsf application or jsf servlet.
- *
+ * <p>
  * @author marembo
  */
 public class JFlemaxController {
@@ -135,7 +138,7 @@ public class JFlemaxController {
 
     /**
      * Returns empty string if the context path is null or empty.
-     *
+     * <p>
      * @return
      */
     public static String getContextName() {
@@ -152,9 +155,9 @@ public class JFlemaxController {
     }
 
     /**
-     * Returns the relative referring path to the context root, if the referring path refers to this application,
-     * otherwise the entire url is returned.
-     *
+     * Returns the relative referring path to the context root, if the referring path refers to this application, otherwise the entire url is
+     * returned.
+     * <p>
      * @return
      */
     public static String getReferringPath() {
@@ -205,7 +208,7 @@ public class JFlemaxController {
 
     /**
      * Returns the applications full url, including the context path attached.
-     *
+     * <p>
      * @return
      */
     public static String getApplicationUrl() {
@@ -216,7 +219,7 @@ public class JFlemaxController {
 
     /**
      * Returns the applications full url, including the context path attached and request scheme.
-     *
+     * <p>
      * @return
      */
     public static String getSchematicApplicationUrl() {
@@ -228,7 +231,7 @@ public class JFlemaxController {
 
     /**
      * Returns true if the current scheme is https.
-     *
+     * <p>
      * @return
      */
     public static boolean isSecure() {
@@ -238,7 +241,7 @@ public class JFlemaxController {
 
     /**
      * Get the current scheme for used by the current request.F
-     *
+     * <p>
      * @return
      */
     public static String getScheme() {
@@ -254,29 +257,6 @@ public class JFlemaxController {
             }
         }
         return getUserAgent(userAgentHeader);
-    }
-
-    private static UserAgent tryGetMicrosoftAgent(String uah) {
-        //if we have both mozilla and windows nt string, then we are definitely working with windows and msie.
-        uah = uah.toLowerCase();
-        if (uah.contains("mozilla") && uah.contains("windows nt")) {
-            UserAgent ua = new UserAgent();
-            ua.setOs("Windows");
-            //get windows version
-            String regex = "windows\\s+[^\\d*\\w*]\\d+\\.*\\d*";
-            Pattern p = Pattern.compile(regex);
-            Matcher m = p.matcher(uah);
-            if (m.find()) {
-                int ix = m.start(), ix0 = m.end();
-                //get the sub
-                String windowsVersion = uah.substring(ix, ix0);
-                int ix1 = windowsVersion.indexOf("nt");
-                String version = windowsVersion.substring(ix1).trim();
-                ua.setOsVersion(version);
-            }
-            return ua;
-        }
-        return null;
     }
 
     protected static UserAgent getUserAgent(String userAgentHeader) {
@@ -367,71 +347,24 @@ public class JFlemaxController {
                 .addResponseCookie(name, value, cookieParams);
     }
 
-    @SuppressWarnings({"UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch"})
-    protected void validateRequest() {
-        //get parameter for ignore request
-        String value = getParameter(IGNORE_VALIDATION);
-        if (value != null && Boolean.valueOf(value)) {
-            return;
+    private BeanManager getBeanManager() {
+        try {
+            return (BeanManager) InitialContext.doLookup("java:comp/BeanManager");
+        } catch (final NamingException e) {
+            throw Throwables.propagate(e);
         }
-        String requestPath = getRequestPath();
-        String referingPath = getReferringPath();
-        String contextPath = getContextPath();
-        if (referingPath != null && referingPath.contains(contextPath)) {
-            referingPath = referingPath.substring(referingPath.indexOf(contextPath) + contextPath.length());
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T lookup(final Class<T> clazz) {
+        final BeanManager bm = getBeanManager();
+        final Iterator<Bean<?>> iter = bm.getBeans(clazz).iterator();
+        if (!iter.hasNext()) {
+            throw new IllegalStateException("CDI BeanManager cannot find an instance of requested type " + clazz.getName());
         }
-        PageInformation pageInformation = getPageInformation();
-        if (pageInformation != null) {
-            Set<RequestInfo> requestInfos = pageInformation.getRequestInfos(requestPath,
-                                                                            getPrincipal() != null ? LoginStatus.WHEN_LOGGED_IN : LoginStatus.WHEN_LOGGED_OUT);
-            if (requestInfos == null) {
-                return;
-            }
-            FacesContext context = FacesContext.getCurrentInstance();
-            boolean ajaxRequest = context.getPartialViewContext().isAjaxRequest();
-            boolean loginRequest = (getPrincipal() != null);
-            List<RequestInfo> infos = new ArrayList<RequestInfo>();
-            for (RequestInfo requestInfo : requestInfos) {
-                try {
-                    RequestStatus requestStatus = requestInfo.getRequestStatus();
-                    LoginStatus loginStatus = requestInfo.getLoginStatus();
-                    boolean executeOnAjax = (ajaxRequest && (requestStatus == RequestStatus.AJAX_REQUEST))
-                            || (!ajaxRequest && (requestStatus == RequestStatus.FULL_REQUEST))
-                            || (requestStatus == RequestStatus.ANY_REQUEST);
-                    boolean executeOnLogin = (loginRequest && (loginStatus == LoginStatus.WHEN_LOGGED_IN))
-                            || (!loginRequest && (loginStatus == LoginStatus.WHEN_LOGGED_OUT))
-                            || (loginStatus == LoginStatus.EITHER);
-                    boolean executeValidate = executeOnAjax && executeOnLogin;
-                    if (executeValidate) {
-                        Object controller = JFlemaxController.findManagedBean(requestInfo.getController());
-                        if (controller != null) {
-                            Class<?> controllerClass = controller.getClass();
-                            Method validatingMethod = controllerClass.
-                                    getDeclaredMethod(requestInfo.getOnRequestMethod(), new Class<?>[]{});
-                            if (validatingMethod != null) {
-                                Object res = validatingMethod.invoke(controller, new Object[]{});
-                                if (res != null && res instanceof Boolean) {
-                                    Boolean state = (Boolean) res;
-                                    boolean doRedirect = (state && requestInfo.getRedirectStatus() == RedirectStatus.ON_SUCCESS)
-                                            || (!state && requestInfo.getRedirectStatus() == RedirectStatus.ON_FAILURE);
-                                    if (doRedirect && requestInfo.isRedirect()) {
-                                        infos.add(requestInfo);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    logError(e);
-                } finally {
-                    //check if the request is to be executed only once, and then removed from the queue
-                    if (requestInfo.getExecuteCycle() == ExecuteCycle.ONCE) {
-                        pageInformation.removeFromQueue(requestInfo);
-                    }
-                }
-            }
-            redirectRequest(infos, referingPath);
-        }
+        final Bean<T> bean = (Bean<T>) iter.next();
+        final CreationalContext<T> ctx = bm.createCreationalContext(bean);
+        return (T) bm.getReference(bean, clazz, ctx);
     }
 
     @SuppressWarnings({"UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch"})
@@ -478,9 +411,9 @@ public class JFlemaxController {
                             || (loginStatus == LoginStatus.EITHER);
                     boolean executeValidate = executeOnAjax && executeOnLogin;
                     if (executeValidate) {
-                        Object controller = JFlemaxController.findManagedBean(requestInfo.getController());
+                        final Class<?> controllerClass = requestInfo.getController();
+                        final Object controller = lookup(requestInfo.getController());
                         if (controller != null) {
-                            Class<?> controllerClass = controller.getClass();
                             Method validatingMethod = controllerClass.
                                     getDeclaredMethod(requestInfo.getOnRequestMethod(), new Class<?>[]{});
                             if (validatingMethod != null) {
@@ -601,67 +534,6 @@ public class JFlemaxController {
         }
     }
 
-    private void redirectRequest(List<RequestInfo> infos, String referingPath) {
-        for (RequestInfo requestInfo : infos) {
-            String redirectPage = requestInfo.getRedirectPage();
-            if (redirectPage.trim().isEmpty()) {
-                redirectPage = indexPath();
-            } else {
-                if (!redirectPage.contains(".xhtml")) {
-                    redirectPage += ".xhtml";
-                }
-            }
-            /**
-             * We should not redirect to the same page
-             */
-            if (!redirectPage.equals(referingPath)) {
-                if (!FacesContext.getCurrentInstance().getResponseComplete()) {
-                    redirect(redirectPage);
-                }
-                break; //after first redirect, we move out since we cannot redirect to more than one page.
-            }
-        }
-    }
-
-    public static <T> T findManagedBean(Class<T> beanClass) {
-        try {
-            String name = beanClass.getSimpleName();
-            name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
-            Object o = findManagedBean(name);
-            return beanClass.cast(o);
-        } catch (Exception e) {
-            logError(e);
-            return null;
-        }
-    }
-
-    public static Object findManagedBean(String name) {
-        try {
-            FacesContext facesContext = FacesContext.getCurrentInstance();
-            Object o = facesContext.getApplication().getELResolver().
-                    getValue(facesContext.getELContext(), null, name);
-            return o;
-        } catch (Exception e) {
-            logError(e);
-            return null;
-        }
-    }
-
-    public static <T> T findManagedBean(Class<T> beanClass, FacesContext facesContext) {
-        try {
-            String name = beanClass.getSimpleName();
-            name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
-            ELResolver eLResolver = facesContext.getApplication().getELResolver();
-            Object o = eLResolver.getValue(facesContext.getELContext(), null, name);
-            System.err.println("findManagedBean: resolution state for: " + name + " = " + facesContext.getELContext().
-                    isPropertyResolved());
-            return beanClass.cast(o);
-        } catch (Exception e) {
-            logError(e);
-            return null;
-        }
-    }
-
     public static boolean isAjaxRequest() {
         return FacesContext.getCurrentInstance().getPartialViewContext().isAjaxRequest();
     }
@@ -728,10 +600,10 @@ public class JFlemaxController {
     }
 
     /**
-     * From OmniFaces Library. Returns the Internet Protocol (IP) address of the client that sent the request. This will
-     * first check the <code>X-Forwarded-For</code> request header and if it's present, then return its first IP
-     * address, else just return {@link HttpServletRequest#getRemoteAddress()} unmodified.
-     *
+     * From OmniFaces Library. Returns the Internet Protocol (IP) address of the client that sent the request. This will first check the
+     * <code>X-Forwarded-For</code> request header and if it's present, then return its first IP address, else just return
+     * {@link HttpServletRequest#getRemoteAddress()} unmodified.
+     * <p>
      * @return The IP address of the client.
      * @see HttpServletRequest#getRemoteAddress()
      * @since 1.2
@@ -750,9 +622,8 @@ public class JFlemaxController {
     }
 
     /**
-     * Returns all context relative paths of all resources that end in .xhtml This method depends on the current web
-     * application request context.
-     *
+     * Returns all context relative paths of all resources that end in xhtml. This method depends on the current web application request context.
+     * <p>
      * @return
      */
     public static List<String> applicationResourcePaths() {
@@ -769,9 +640,9 @@ public class JFlemaxController {
 
     /**
      * Returns all context relative paths of all resources that end in .xhtml.
-     *
+     * <p>
      * We use the current application path to retrieve the resources.
-     *
+     * <p>
      * @param pathExtension
      * @return
      */
