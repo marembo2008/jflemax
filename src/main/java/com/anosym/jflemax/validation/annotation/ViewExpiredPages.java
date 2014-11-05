@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.anosym.jflemax.validation.annotation;
 
 import java.lang.annotation.Documented;
@@ -10,6 +6,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.atteo.classindex.IndexAnnotated;
 
 /**
  *
@@ -19,12 +16,13 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
+@IndexAnnotated
 public @interface ViewExpiredPages {
 
-  /**
-   * The pages to recreate when view is expired on them.
-   *
-   * @return
-   */
-  String[] pages();
+    /**
+     * The pages to recreate when view is expired on them.
+     * <p>
+     * @return
+     */
+    String[] pages();
 }

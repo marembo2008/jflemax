@@ -1,22 +1,22 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.anosym.jflemax.validation;
 
+import com.anosym.jflemax.validation.annotation.OnRequests;
+import java.util.logging.Logger;
 import javax.inject.Named;
 
 /**
  *
  * @author marembo
  */
+@OnRequests
 @Named
 class ControllerImpl extends AbstractControllerTest {
 
-  @Override
-  public void onRequest() {
-    com.anosym.jflemax.JFlemaxLogger.fine("ControllerImpl: OnRequest()");
-  }
+    private static final Logger LOG = Logger.getLogger(ControllerImpl.class.getName());
+
+    @Override
+    public void onRequest() {
+        LOG.info("ControllerImpl called");
+    }
 
 }

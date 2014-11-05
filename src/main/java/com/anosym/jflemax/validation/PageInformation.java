@@ -10,7 +10,6 @@ import com.anosym.jflemax.validation.annotation.LoginStatus;
 import com.anosym.jflemax.validation.annotation.OnRequest;
 import com.anosym.jflemax.validation.annotation.OnRequests;
 import com.anosym.jflemax.validation.annotation.Principal;
-import com.anosym.jflemax.validation.controller.JFlemaxController;
 import com.anosym.utilities.IdGenerator;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -32,15 +31,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nonnull;
 import javax.faces.event.PhaseId;
 import javax.inject.Named;
-import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
+import org.atteo.classindex.ClassIndex;
 
 /**
  *
@@ -48,9 +42,8 @@ import org.reflections.util.FilterBuilder;
  */
 public class PageInformation implements Serializable {
 
-    static {
-        com.anosym.jflemax.JFlemaxLogger.fine("PageInformation: should not be created more than once!");
-    }
+    private static final Logger LOG = Logger.getLogger(PageInformation.class.getName());
+
     private static final long serialVersionUID = IdGenerator.serialVersionUID(PageInformation.class);
     private static PageInformation pageInformation;
     private Map<String, Set<RequestInfo>> onRequestInfos = new HashMap<String, Set<RequestInfo>>();
@@ -110,19 +103,19 @@ public class PageInformation implements Serializable {
         this.onRequestInfos = onRequestInfos;
     }
 
-    public void processController(Object controller) {
+    public void processController(@Nonnull final Object controller) {
         try {
             Class<?> cls = controller.getClass();
             addRequest(cls);
         } catch (Exception e) {
-            Logger.getLogger(PageInformation.class.getSimpleName()).log(Level.SEVERE, controller + "", e);
+            LOG.log(Level.SEVERE, controller + "", e);
         }
     }
 
-    public void processController(Class<?> cls) {
+    public void processController(@Nonnull final Class<?> cls) {
         addRequest(cls);
         //scan for Principal info
-        Method[] ms = cls.getMethods();
+        final Method[] ms = cls.getMethods();
         if (pageInformation.principalInfo == null) {
             for (Method method : ms) {
                 if (method.isAnnotationPresent(Principal.class)) {
@@ -339,37 +332,32 @@ public class PageInformation implements Serializable {
         return pageInformation;
     }
 
-    private static void processCacheControlInfo(org.reflections.Reflections reflections, PageInformation pageInformation) {
-        Set<Class<?>> annotatedBeans = reflections.getTypesAnnotatedWith(CacheControl.class);
-        if (annotatedBeans != null) {
-            for (Class<?> c : annotatedBeans) {
-                CacheControl cc = c.getAnnotation(CacheControl.class);
-                if (cc != null) {
-                    if (pageInformation.cacheControlInfos == null) {
-                        pageInformation.cacheControlInfos = new ArrayList<CacheControlInfo>();
-                    }
-                    pageInformation.cacheControlInfos.add(new CacheControlInfo(cc.urls(), cc.cached()));
+    private static void processCacheControlInfo(@Nonnull final PageInformation pageInformation) {
+        final Iterable<Class<?>> annotatedBeans = ClassIndex.getAnnotated(CacheControl.class);
+        for (final Class<?> c : annotatedBeans) {
+            final CacheControl cc = c.getAnnotation(CacheControl.class);
+            if (cc != null) {
+                if (pageInformation.cacheControlInfos == null) {
+                    pageInformation.cacheControlInfos = new ArrayList<CacheControlInfo>();
                 }
+                pageInformation.cacheControlInfos.add(new CacheControlInfo(cc.urls(), cc.cached()));
             }
         }
     }
 
-    private static void processViewExpiredPages(org.reflections.Reflections reflections, PageInformation pageInformation) {
-        Set<Class<?>> annotatedBeans = reflections.getTypesAnnotatedWith(com.anosym.jflemax.validation.annotation.ViewExpiredPages.class);
-        if (annotatedBeans != null) {
-            String pages[] = {};
-            for (Class<?> c : annotatedBeans) {
-                com.anosym.jflemax.validation.annotation.ViewExpiredPages viewExpiredPages
-                        = c.getAnnotation(com.anosym.jflemax.validation.annotation.ViewExpiredPages.class);
-                CacheControl cc = c.getAnnotation(CacheControl.class);
-                if (viewExpiredPages != null) {
-                    pages = Arrays.copyOf(pages, pages.length + viewExpiredPages.pages().length);
-                    System.arraycopy(viewExpiredPages.pages(), 0, pages, (pages.length - viewExpiredPages.pages().length),
-                                     viewExpiredPages.pages().length);
-                }
+    private static void processViewExpiredPages(@Nonnull final PageInformation pageInformation) {
+        final Iterable<Class<?>> annotatedBeans = ClassIndex.getAnnotated(com.anosym.jflemax.validation.annotation.ViewExpiredPages.class);
+        String pages[] = {};
+        for (final Class<?> c : annotatedBeans) {
+            final com.anosym.jflemax.validation.annotation.ViewExpiredPages viewExpiredPages
+                    = c.getAnnotation(com.anosym.jflemax.validation.annotation.ViewExpiredPages.class);
+            if (viewExpiredPages != null) {
+                pages = Arrays.copyOf(pages, pages.length + viewExpiredPages.pages().length);
+                System.arraycopy(viewExpiredPages.pages(), 0, pages, (pages.length - viewExpiredPages.pages().length),
+                                 viewExpiredPages.pages().length);
             }
-            pageInformation.viewExpiredPages = new ViewExpiredPages(pages);
         }
+        pageInformation.viewExpiredPages = new ViewExpiredPages(pages);
     }
 
     public static boolean isCurrentPageCached(String page) {
@@ -386,20 +374,13 @@ public class PageInformation implements Serializable {
 
     public static void onApplicationStart() {
         pageInformation = new PageInformation();
-        org.reflections.Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .filterInputsBy(new FilterBuilder()
-                        .include(FilterBuilder.prefix(System.getProperty(JFlemaxController.APPLICATION_PACKAGE, "com")))
-                        .include(FilterBuilder.prefix("com.flemax")))
-                .setUrls(ClasspathHelper.forPackage("com"))
-                .setScanners(new SubTypesScanner(),
-                             new TypeAnnotationsScanner(),
-                             new ResourcesScanner()));
+        final Iterable<Class<?>> onRequestsBeans = ClassIndex.getAnnotated(OnRequests.class);
+        final Iterable<Class<?>> onRequestBeans = ClassIndex.getAnnotated(OnRequest.class);
+        final Iterable<Class<?>> debugBeans = ClassIndex.getAnnotated(Debug.class);
         //process cached controlls.
-        processCacheControlInfo(reflections, pageInformation);
-        processViewExpiredPages(reflections, pageInformation);
+        processCacheControlInfo(pageInformation);
+        processViewExpiredPages(pageInformation);
         //scan for onrequests and onrequest
-        Set<Class<?>> annotatedBeans = reflections.getTypesAnnotatedWith(OnRequests.class);
-        Set<Class<?>> debugBeans = reflections.getTypesAnnotatedWith(Debug.class);
         if (debugBeans != null) {
             for (Class<?> cls : debugBeans) {
                 Debug dbg = cls.getAnnotation(Debug.class);
@@ -412,14 +393,13 @@ public class PageInformation implements Serializable {
                 }
             }
         }
-        for (Class<?> c : annotatedBeans) {
+        for (Class<?> c : onRequestsBeans) {
             //process only if @Named
             if (isAcceptableControler(c)) {
                 pageInformation.processController(c);
             }
         }
-        annotatedBeans = reflections.getTypesAnnotatedWith(OnRequest.class);
-        for (Class<?> c : annotatedBeans) {
+        for (Class<?> c : onRequestBeans) {
             if (isAcceptableControler(c)) {
                 pageInformation.processController(c);
             }
@@ -440,39 +420,5 @@ public class PageInformation implements Serializable {
                 && !c.isSynthetic()
                 && !Modifier.isAbstract(m)
                 && !Modifier.isInterface(m);
-    }
-
-    public static void onApplicationStart(String applicationPackage, String contextName) {
-        pageInformation = new PageInformation();
-        pageInformation.setContextName(contextName);
-        org.reflections.Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .filterInputsBy(new FilterBuilder()
-                        .include(FilterBuilder.prefix(applicationPackage))
-                        .include(FilterBuilder.prefix("com.flemax")))
-                .setUrls(ClasspathHelper.forPackage("com"))
-                .setScanners(new SubTypesScanner(),
-                             new TypeAnnotationsScanner(),
-                             new ResourcesScanner()));
-        //scan for current principal
-        Set<Method> m = reflections.getMethodsAnnotatedWith(Principal.class);
-        if (m != null && !m.isEmpty()) {
-            Method method = m.iterator().next();
-            pageInformation.principalInfo = new PrincipalInfo(method.getDeclaringClass(), method);
-        }
-        //scan for index path
-        Set<Method> im = reflections.getMethodsAnnotatedWith(IndexPath.class);
-        if (im != null && !im.isEmpty()) {
-            Method method = im.iterator().next();
-            pageInformation.indexPathInfo = new IndexPathInfo(method.getDeclaringClass(), method);
-        }
-        //scan for onrequests and onrequest
-        Set<Class<?>> annotatedBeans = reflections.getTypesAnnotatedWith(OnRequests.class);
-        for (Class<?> c : annotatedBeans) {
-            pageInformation.processController(c);
-        }
-        annotatedBeans = reflections.getTypesAnnotatedWith(OnRequest.class);
-        for (Class<?> c : annotatedBeans) {
-            pageInformation.processController(c);
-        }
     }
 }
