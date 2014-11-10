@@ -367,19 +367,15 @@ public class JFlemaxController {
         return (T) bm.getReference(bean, clazz, ctx);
     }
 
-    @SuppressWarnings({"UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch"})
-    protected void validateRequest(PhaseId phaseId, JsfPhaseIdOption jsfPhaseIdOption) throws Exception {
+    protected void validateRequest(PhaseId phaseId, JsfPhaseIdOption jsfPhaseIdOption) {
         //get parameter for ignore request
         String value = getParameter(IGNORE_VALIDATION);
         if (value != null && Boolean.valueOf(value)) {
-            com.anosym.jflemax.JFlemaxLogger.fine("Ignoring validation");
             return;
         }
         String requestPath = getRequestPath();
         String referingPath = getReferringPath();
         String contextPath = getContextPath();
-        com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "Request Path: {0}", requestPath);
-        com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "Referring Path: {0}", referingPath);
         if (referingPath != null && referingPath.contains(contextPath)) {
             referingPath = referingPath.substring(referingPath.indexOf(contextPath) + contextPath.length());
         }
@@ -395,12 +391,11 @@ public class JFlemaxController {
             FacesContext context = FacesContext.getCurrentInstance();
             boolean ajaxRequest = context.getPartialViewContext().isAjaxRequest();
             boolean loginRequest = (getPrincipal() != null);
-            Map<RequestInfo, Boolean> infos = new HashMap<RequestInfo, Boolean>();
-            Map<RequestInfo, Integer> infos0 = new HashMap<RequestInfo, Integer>();
+            Map<RequestInfo, Boolean> infos = new HashMap<>();
+            Map<RequestInfo, Integer> infos0 = new HashMap<>();
             for (RequestInfo requestInfo : requestInfos) {
                 Object result = null;
                 try {
-                    com.anosym.jflemax.JFlemaxLogger.log(Level.FINE, "Request Info: {0}", requestInfo);
                     RequestStatus requestStatus = requestInfo.getRequestStatus();
                     LoginStatus loginStatus = requestInfo.getLoginStatus();
                     boolean executeOnAjax = (ajaxRequest && (requestStatus == RequestStatus.AJAX_REQUEST))
@@ -417,12 +412,7 @@ public class JFlemaxController {
                             Method validatingMethod = controllerClass.
                                     getDeclaredMethod(requestInfo.getOnRequestMethod(), new Class<?>[]{});
                             if (validatingMethod != null) {
-                                try {
-                                    result = validatingMethod.invoke(controller, new Object[]{});
-                                } catch (final InvocationTargetException ite) {
-                                    //we propagate the cause of the exception
-                                    throw Throwables.propagate(ite.getCause());
-                                }
+                                result = validatingMethod.invoke(controller, new Object[]{});
                                 LOG.log(Level.FINE, "OnRequestMethod invoked: {0}", validatingMethod.getName());
                                 if (result != null) {
                                     if (result instanceof Boolean) {
@@ -444,6 +434,8 @@ public class JFlemaxController {
                             }
                         }
                     }
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+                    throw Throwables.propagate(ex);
                 } finally {
                     //check if the request is to be executed only once, and then removed from the queue
                     if (requestInfo.getExecuteCycle() == ExecuteCycle.ONCE) {
