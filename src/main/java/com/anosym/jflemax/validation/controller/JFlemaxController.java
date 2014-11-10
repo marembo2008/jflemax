@@ -38,6 +38,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import static com.google.common.base.Objects.firstNonNull;
+
 /**
  * All method calls within this class expect FacesContext. Do not call if not within jsf application or jsf servlet.
  * <p>
@@ -434,7 +436,11 @@ public class JFlemaxController {
                             }
                         }
                     }
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+                } catch (final InvocationTargetException ite) {
+                    final Throwable ex = ite.getCause();
+                    //we rethow the cause, hoping it was a runtime exeption
+                    throw Throwables.propagate(firstNonNull(ex, ite));
+                } catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException ex) {
                     throw Throwables.propagate(ex);
                 } finally {
                     //check if the request is to be executed only once, and then removed from the queue
