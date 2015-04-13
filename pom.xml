@@ -84,8 +84,8 @@
             <version>3.0.0</version>
         </dependency>
         <dependency>
-            <groupId>com.anosym.jflemax</groupId>
-            <artifactId>jflemax</artifactId>
+            <groupId>com.anosym.ip_mapping</groupId>
+            <artifactId>ip_mapping</artifactId>
             <version>1.0</version>
         </dependency>
         <dependency>
